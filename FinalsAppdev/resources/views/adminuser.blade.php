@@ -11,6 +11,9 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css" rel="stylesheet">
     <style>
         body {
             min-height: 100vh;
@@ -113,12 +116,39 @@
             width: 60px;
             height: 60px;
         }
+
+        /* Adjusting Search Filter and Table Spacing */
+        .dataTables_filter {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .dataTables_filter input {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .dataTables_length {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .dataTables_length select {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="text-center mb-4 px-3">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid logo-img">
+            <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="img-fluid logo-img">
         </div>
 
         <ul class="nav flex-column">
@@ -168,7 +198,7 @@
             <div class="mt-5">
                 <h4 class="mb-3">Registered Users</h4>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover bg-white">
+                    <table id="usersTable" class="table table-bordered table-striped table-hover bg-white">
                     <thead class="table-secondary">
                         <tr>
                             <th>ID</th>
@@ -207,57 +237,72 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-        <form method="POST" id="deleteForm">
-            @csrf
-            @method('DELETE')
-            <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <form method="POST" id="deleteForm">
+                @csrf
+                @method('DELETE')
+                <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                Are you sure you want to delete this user?
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                    <span id="deleteBtnText">Delete</span>
+                    <span id="deleteBtnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                </button>
+                </div>
+            </form>
             </div>
-            <div class="modal-body">
-            Are you sure you want to delete this resort owner?
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
-                <span id="deleteBtnText">Delete</span>
-                <span id="deleteBtnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
-            </button>
-            </div>
-        </form>
         </div>
     </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteForm = document.getElementById('deleteForm');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-        const deleteBtnText = document.getElementById('deleteBtnText');
-        const deleteBtnSpinner = document.getElementById('deleteBtnSpinner');
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
 
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const deleteUrl = button.getAttribute('data-delete-url');
-
-            deleteForm.action = deleteUrl;
-
-            // Reset loading state when modal opens
-            confirmDeleteBtn.disabled = false;
-            deleteBtnText.classList.remove('d-none');
-            deleteBtnSpinner.classList.add('d-none');
+<script>
+    $(document).ready(function () {
+        $('#usersTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [5, 10, 25, 50],
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search users..."
+            }
         });
+    });
 
-        deleteForm.addEventListener('submit', function () {
-            confirmDeleteBtn.disabled = true;
-            deleteBtnText.classList.add('d-none');
-            deleteBtnSpinner.classList.remove('d-none');
-        });
-    </script>
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const deleteBtnText = document.getElementById('deleteBtnText');
+    const deleteBtnSpinner = document.getElementById('deleteBtnSpinner');
+
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const deleteUrl = button.getAttribute('data-delete-url');
+        deleteForm.action = deleteUrl;
+
+        confirmDeleteBtn.disabled = false;
+        deleteBtnText.classList.remove('d-none');
+        deleteBtnSpinner.classList.add('d-none');
+    });
+
+    deleteForm.addEventListener('submit', function () {
+        confirmDeleteBtn.disabled = true;
+        deleteBtnText.classList.add('d-none');
+        deleteBtnSpinner.classList.remove('d-none');
+    });
+</script>
 
 </body>
 </html>

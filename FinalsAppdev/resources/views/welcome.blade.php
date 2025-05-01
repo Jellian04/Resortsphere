@@ -15,6 +15,7 @@
             height: 80vh;
             position: relative;
             color: white;
+            background-attachment: fixed;  /* Parallax effect */
         }
 
         .hero-overlay {
@@ -37,33 +38,33 @@
 
         .navbar-nav {
             display: flex;
-            gap: 20px; /* Adjust the space between the links */
+            gap: 20px;
         }
 
         .navbar .nav-link:hover,
         .navbar .nav-link:focus {
-            background-color: rgba(255, 255, 255, 0.5); /* More visible translucent white */
-            color: #000000 !important; /* Black text on hover */
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #000000 !important;
             border-radius: 6px;
             padding: 6px 12px;
             transition: all 0.3s ease-in-out;
         }
 
         .navbar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.5) !important; /* Same translucent white background */
-            color: #000000 !important; /* Black text */
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            color: #000000 !important;
             border-radius: 6px;
             font-weight: bold;
         }
 
         .navbar .nav-link {
             color: white !important;
-            font-size: 1.25rem; /* Adjust the size here */s
-            margin-right: 50px; /* Adjust the space between the links */
+            font-size: 1.25rem;
+            margin-right: 50px;
         }
 
         .navbar .nav-link:last-child {
-            margin-right: 0; /* Remove the margin on the last link */
+            margin-right: 0;
         }
 
         .navbar {
@@ -90,7 +91,13 @@
         }
 
         .text-dark-blue {
-            color: #001f3f; /* Dark blue color */
+            color: #001f3f;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                background-attachment: scroll; /* Disable parallax on mobile */
+            }
         }
     </style>
 </head>
@@ -102,7 +109,7 @@
         <nav class="navbar navbar-expand-lg bg-transparent position-absolute w-100">
             <div class="container d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
                     <h4 class="mb-0 text-white">Resortsphere</h4>
                 </div>
                 <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -128,42 +135,38 @@
     </section>
 
     <!-- EXPLORE SECTION -->
-        <section class="py-5">
-            <div class="container text-center">
-                <h2>EXPLORE YOUR DREAM GETAWAY</h2>
-                <p>Find the perfect place to relax...</p>
-                <div class="row mt-4">
+    <section class="py-5">
+        <div class="container text-center">
+            <h2>EXPLORE YOUR DREAM GETAWAY</h2>
+            <p>Find the perfect place to relax...</p>
+            <div class="row mt-4">
+                @php
+                    $resorts = [
+                        ['name' => 'Sogod Bay Scuba Resort', 'email' => 'sogod.scuba@gmail.com', 'image' => 'sogod bay scuba resort.jpg', 'link' => 'resort1'],
+                        ['name' => 'Peters Dive Resort', 'email' => 'peters.dive@gmail.com', 'image' => 'peters dive resort.jpg', 'link' => 'resort2'],
+                        ['name' => 'Padre Burgos Castle Resort', 'email' => 'padreburgos.castle@gmail.com', 'image' => 'padre burgos castle resort.jpg', 'link' => 'resort3'],
+                        ['name' => 'Burgos Reef Boutique Resort', 'email' => 'burgos.reefresort@gmail.com', 'image' => 'burgos reef boutique resort.jpg', 'link' => 'resort4']
+                    ];
+                @endphp
 
-                    @php
-                        $resorts = [
-                            ['name' => 'Sogod Bay Scuba Resort', 'email' => 'sogod.scuba@gmail.com', 'image' => 'sogod bay scuba resort.jpg', 'link' => 'resort1'],
-                            ['name' => 'Peters Dive Resort', 'email' => 'peters.dive@gmail.com', 'image' => 'peters dive resort.jpg', 'link' => 'resort2'],
-                            ['name' => 'Padre Burgos Castle Resort', 'email' => 'padreburgos.castle@gmail.com', 'image' => 'padre burgos castle resort.jpg', 'link' => 'resort3'],
-                            ['name' => 'Burgos Reef Boutique Resort', 'email' => 'burgos.reefresort@gmail.com', 'image' => 'burgos reef boutique resort.jpg', 'link' => 'resort4']
-                        ];
-                    @endphp
-
-                    @foreach ($resorts as $resort)
-                        <div class="col-md-3 mb-4">
-                            <a href="{{ url('/' . $resort['link']) }}" class="text-decoration-none text-dark">
-                                <div class="card h-100 shadow-sm">
-                                    <img src="{{ asset('/images/' . $resort['image']) }}" class="card-img-top" alt="{{ $resort['name'] }}">
-                                    <div class="card-body">
-                                        <div class="text-start">
-                                            <h5 class="card-title mb-1">{{ $resort['name'] }}</h5>
-                                            <p class="card-text text-muted mb-0">{{ $resort['email'] }}</p>
-                                        </div>
-                                        <i class="bi bi-info-circle-fill text-dark-blue fs-4 ms-2"></i>
+                @foreach ($resorts as $resort)
+                    <div class="col-md-3 mb-4">
+                        <a href="{{ url('/' . $resort['link']) }}" class="text-decoration-none text-dark">
+                            <div class="card h-100 shadow-sm">
+                                <img src="{{ asset('/images/' . $resort['image']) }}" class="card-img-top" alt="{{ $resort['name'] }}">
+                                <div class="card-body">
+                                    <div class="text-start">
+                                        <h5 class="card-title mb-1">{{ $resort['name'] }}</h5>
+                                        <p class="card-text text-muted mb-0">{{ $resort['email'] }}</p>
                                     </div>
+                                    <i class="bi bi-info-circle-fill text-dark-blue fs-4 ms-2"></i>
                                 </div>
-                            </a>
-                        </div>
-                    @endforeach
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
 
-                </div>
             </div>
-        </section>
-
         </div>
     </section>
 

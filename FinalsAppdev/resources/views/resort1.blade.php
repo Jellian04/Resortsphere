@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Parallax Hero Section */
         .hero {
             background-image: url('{{ asset('images/sogod bay scuba resort.jpg') }}');
             background-size: cover;
@@ -15,7 +16,9 @@
             height: 80vh;
             position: relative;
             color: white;
+            background-attachment: fixed;
         }
+
 
         .hero-overlay {
             background: rgba(0, 0, 0, 0.5);
@@ -177,7 +180,7 @@
         <nav class="navbar navbar-expand-lg bg-transparent position-absolute w-100">
             <div class="container d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
                     <h4 class="mb-0 text-white">Resortsphere</h4>
                 </div>
                 <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -290,9 +293,8 @@
             @endforeach
         </div>
     </div>
-    </section>
-
-    <!-- FOOTER -->
+</section>
+<!-- FOOTER -->
     <footer class="footer-darkblue text-white text-center py-3">
         <div class="container">
             <p>&copy; {{ date('Y') }} Resortsphere. All rights reserved.</p>
@@ -301,4 +303,4 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>  
+</html>

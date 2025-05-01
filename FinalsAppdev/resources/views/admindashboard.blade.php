@@ -11,6 +11,9 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
     <style>
         body {
             min-height: 100vh;
@@ -69,6 +72,7 @@
             border: none;
             border-radius: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
 
         .logo-img {
@@ -96,9 +100,9 @@
 
         .table th, .table td {
             vertical-align: middle;
+            padding: 12px;
         }
 
-        /* Custom Table Styles */
         .table-hover tbody tr:hover {
             background-color: #f1f1f1;
         }
@@ -122,6 +126,29 @@
             width: 60px;
             height: 60px;
         }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+      
+         .dataTables_filter {
+            margin-bottom: 20px; 
+        }
+
+        .dataTables_filter input {
+            margin-left: 10px; 
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .table-responsive {
+            margin-top: 30px; 
+        }
+
+        .btn {
+            margin: 2px; 
+        }
     </style>
 </head>
 <body>
@@ -129,7 +156,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="text-center mb-4 px-3">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid logo-img">
+            <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="img-fluid logo-img">
         </div>
 
         <ul class="nav flex-column">
@@ -183,58 +210,68 @@
             <div class="mt-5">
                 <h4 class="mb-3">Pending Resort Owners</h4>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover bg-white">
-                        <thead class="table-primary">
-                            <tr>
-                                <th>ID</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Username</th>
-                                <th>Zipcode</th>
-                                <th>Resort Name</th>
-                                <th>Type</th>
-                                <th>Image</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($pendingOwners as $owner)
-                                <tr>
-                                    <td>{{ $owner->id }}</td>
-                                    <td>{{ $owner->firstname }} {{ $owner->lastname }}</td>
-                                    <td>{{ $owner->email }}</td>
-                                    <td>{{ $owner->username }}</td>
-                                    <td>{{ $owner->zipcode }}</td>
-                                    <td>{{ $owner->resortname }}</td>
-                                    <td>{{ $owner->type_of_accommodation }}</td>
-                                    <td>
-                                        <img src="{{ asset('images/' . $owner->image) }}" alt="Owner Image" class="img-thumbnail">
-
-                                    <td>
-                                        <form action="{{ route('admin.updateStatus', $owner->id) }}" method="POST" class="d-flex">
-                                            @csrf
-                                            <select name="status" class="form-select form-select-sm me-2">
-                                                <option value="pending" {{ $owner->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="approved">Approved</option>
-                                                <option value="rejected">Rejected</option>
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center">No pending owners found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                <table id="pendingOwnersTable" class="table table-bordered table-striped table-hover bg-white">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Zipcode</th>
+                            <th>Resort Name</th>
+                            <th>Type</th>
+                            <th>Image</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($owners as $owner)
+                        <tr>
+                            <td>{{ $owner->id }}</td>
+                            <td>{{ $owner->firstname }} {{ $owner->lastname }}</td>
+                            <td>{{ $owner->email }}</td>
+                            <td>{{ $owner->username }}</td>
+                            <td>{{ $owner->zipcode }}</td>
+                            <td>{{ $owner->resortname }}</td>
+                            <td>{{ $owner->type_of_accommodation }}</td>
+                            <td>
+                                @if($owner->resort_img)
+                                    <img src="{{ asset('images/' . $owner->resort_img) }}" alt="Owner Image" class="img-thumbnail">
+                                @else
+                                    <span>No Image</span>
+                                @endif
+                            </td>
+                            <td>
+                            <form action="{{ route('admin.updatestatus', ['id' => $owner->id]) }}" method="POST">
+                            @csrf
+                                <button type="submit" name="status" value="undo" class="btn btn-sm btn-warning me-2">Undo</button>
+                                <button type="submit" name="status" value="approved" class="btn btn-sm btn-success me-2">Approved</button>
+                                <button type="submit" name="status" value="rejected" class="btn btn-sm btn-danger">Rejected</button>
+                            </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#pendingOwnersTable').DataTable({
+                responsive: true,
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                autoWidth: false,
+            });
+        });
+    </script>
+
 </body>
 </html>

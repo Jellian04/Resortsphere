@@ -15,6 +15,7 @@
             height: 80vh;
             position: relative;
             color: white;
+            background-attachment: fixed;
         }
 
         .hero-overlay {
@@ -158,7 +159,7 @@
         <nav class="navbar navbar-expand-lg bg-transparent position-absolute w-100">
             <div class="container d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Resortsphere Logo" class="me-3 logo-img">
                     <h4 class="mb-0 text-white">Resortsphere</h4>
                 </div>
                 <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

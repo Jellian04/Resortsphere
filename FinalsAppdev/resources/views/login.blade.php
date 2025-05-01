@@ -11,6 +11,8 @@
   <style>
     body {
       background-color: #1E1E1E;
+      background-size: 400% 400%;
+      animation: backgroundAnimation 20s ease infinite;
     }
 
     .auth-container {
@@ -134,84 +136,117 @@
 
         <!-- Register Form -->
         <div id="registerForm" class="form-wrapper">
-          <h4 class="mb-4 text-center">Create an Account</h4>
-          <form method="POST" action="{{ route('register') }}">
-            @csrf
-            <div class="mb-3">
-              <label class="form-label">Username</label>
-              <input type="text" name="username" class="form-control" placeholder="Enter username">
-              @error('username') <div class="text-danger small">{{ $message }}</div> @enderror
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Email Address</label>
-              <input type="email" name="email" class="form-control" placeholder="example@gmail.com" value="{{ old('email') }}" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required>
-              @error('email') <div class="text-danger small">{{ $message }}</div> @enderror
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <div class="position-relative">
-                <input type="password" name="password" class="form-control pe-5" placeholder="Enter at least 8 characters." id="password" required>
-                <span class="eye-icon" onclick="togglePasswordVisibility('password')">
-                  <i class="bi bi-eye" id="password-eye"></i>
-                </span>
-              </div>
-              <div id="passwordError" class="text-danger small"></div>
-              @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
-            </div>
+            <h4 class="mb-4 text-center">Create an Account</h4>
 
-            <div class="mb-3">
-              <label class="form-label">Confirm Password</label>
-              <input type="password" name="password_confirmation" class="form-control" placeholder="Re-enter password" id="confirmPassword" required>
-              <small class="text-muted" id="passwordMatch"></small>
-              <div id="confirmPasswordError" class="text-danger small"></div>
-            </div>
+            @if(session('success'))
+                <div class="alert alert-success text-center">
+                    {{ session('success') }}
+                </div>
+            @endif
 
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
 
-            <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="termsCheckbox" data-bs-toggle="modal" data-bs-target="#termsModal">
-              <label class="form-check-label" for="termsCheckbox">I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>.</label>
-            </div>
+                <!-- Username Input -->
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ old('username') }}">
+                    @error('username') <div class="text-danger small">{{ $message }}</div> @enderror
+                </div>
 
-            <button type="submit" class="btn btn-primary w-100" disabled id="registerBtn">Register</button>
-            <div class="text-center">
-              <button type="button" class="toggle-btn" onclick="toggleForms()">Already have an account? Login</button>
-            </div>
-          </form>
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label class="form-label">Firstname</label>
+                    <input type="text" name="firstname" class="form-control" placeholder="Enter firstname" value="{{ old('firstname') }}" required>
+                    @error('firstname') <div class="text-danger small">{{ $message }}</div> @enderror
+                  </div>
+                  
+                  <div class="mb-3 col-md-6">
+                    <label class="form-label">Lastname</label>
+                    <input type="text" name="lastname" class="form-control" placeholder="Enter lastname" value="{{ old('lastname') }}" required>
+                    @error('lastname') <div class="text-danger small">{{ $message }}</div> @enderror
+                  </div>
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="example@gmail.com" value="{{ old('email') }}" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required>
+                    @error('email') <div class="text-danger small">{{ $message }}</div> @enderror
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="position-relative">
+                        <input type="password" name="password" class="form-control pe-5" placeholder="Enter at least 8 characters." id="password" required>
+                        <span class="eye-icon" onclick="togglePasswordVisibility('password')">
+                            <i class="bi bi-eye" id="password-eye"></i>
+                        </span>
+                    </div>
+                    <div id="passwordError" class="text-danger small"></div>
+                    @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
+                </div>
+
+                <!-- Confirm Password Input -->
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="password_confirmation" class="form-control" placeholder="Re-enter password" id="confirmPassword" required>
+                    <small class="text-muted" id="passwordMatch"></small>
+                    <div id="confirmPasswordError" class="text-danger small"></div>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="termsCheckbox" data-bs-toggle="modal" data-bs-target="#termsModal">
+                    <label class="form-check-label" for="termsCheckbox">I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>.</label>
+                </div>
+
+                <!-- Register Button -->
+                <button type="submit" class="btn btn-primary w-100" id="registerBtn">Register</button>
+
+                <!-- Toggle Login Form Button -->
+                <div class="text-center">
+                    <button type="button" class="toggle-btn" onclick="toggleForms()">Already have an account? Login</button>
+                </div>
+            </form>
         </div>
 
         <!-- Login Form -->
-            <div id="loginForm" class="form-wrapper active">
-              <h4 class="mb-4 text-center">Login</h4>
-              @if(session('error'))
-                <div class="alert alert-danger text-center">
-                  {{ session('error') }}
-                </div>
-              @endif
-              <form method="POST" action="{{ route('login') }}">
-                @csrf
+        <div id="loginForm" class="form-wrapper active">
+          <h4 class="mb-4 text-center">Login</h4>
+          @if(session('error'))
+            <div class="alert alert-danger text-center">
+              {{ session('error') }}
+            </div>
+          @endif
+          <form method="POST" action="{{ route('login') }}">
+            @csrf
 
             <div class="mb-3">
               <label class="form-label">Username</label>
-              <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ old('username') }}">
+              <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ session('username') ? session('username') : old('username') }}">
               @error('username') <div class="text-danger small">{{ $message }}</div> @enderror
             </div>
+
             <div class="mb-3">
               <label class="form-label">Password</label>
               <div class="position-relative">
-                <input type="password" name="password" class="form-control pe-5" id="loginPassword">
+                <input type="password" name="password" class="form-control pe-5" id="loginPassword" value="{{ session('password') ? session('password') : old('password') }}">
                 <span class="eye-icon" onclick="togglePasswordVisibility('loginPassword')">
                   <i class="bi bi-eye" id="loginPassword-eye"></i>
                 </span>
               </div>
               @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
             </div>
+
             <button type="submit" class="btn btn-primary w-100">Login</button>
+
             <div class="text-center">
               <button type="button" class="toggle-btn" onclick="toggleForms()">Don’t have an account? Register</button>
             </div>
           </form>
         </div>
-
       </div>
     </div>
   </div>
@@ -280,7 +315,7 @@
         // Password strength validation (on blur)
         passwordInput.addEventListener('blur', function () {
           const password = passwordInput.value.trim();
-          const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
           if (password === '') {
             passwordError.textContent = 'Password is required.';
           } else if (!passwordStrengthPattern.test(password)) {
@@ -378,12 +413,23 @@
         // If everything is valid, submit the login form or handle additional logic here
         return true;  // Allow form submission or further processing
       }
-
         // Toggle between register and login forms
         registerForm.classList.toggle('active');
         loginForm.classList.toggle('active');
       }
     </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+
+    // Prevent back button caching
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || window.performance && window.performance.navigation.type === 2) {
+            window.location.reload();
+        }
+    });
+</script>
 </body>
 </html>

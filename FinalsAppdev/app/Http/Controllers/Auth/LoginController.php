@@ -19,12 +19,13 @@ class LoginController extends Controller
         // Validate input
         $request->validate([
             'username' => 'required|string',
-            'password' => 'required|string',
+            'password' => ['required', 'regex:/[!@#$%^&*(),.?":{}|<>]/'],
+
         ]);
     
         // Admin credentials (hardcoded)
         $adminUsername = 'Admin';
-        $adminPassword = 'Admin246';
+        $adminPassword = 'Admin246_>@';
     
         if (
             $request->username === $adminUsername &&
@@ -58,8 +59,6 @@ class LoginController extends Controller
         return redirect()->route('resort.owner');
     }
     
-
-
     public function username()
     {
         return 'username';

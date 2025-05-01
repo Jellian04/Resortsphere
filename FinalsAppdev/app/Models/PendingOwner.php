@@ -13,6 +13,6 @@ class PendingOwner extends Model
     protected $fillable = [
         'firstname', 'lastname', 'email', 'username', 'password',
         'zipcode', 'resortname', 'resorts_address', 'type_of_accommodation',
-        'description', 'resort_img', 'status'
+        'description', 'resort_img', 'status', 'user_id'
     ];
 }

@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link rel="icon" href="{{ asset('images/Logo.png') }}" type="image/x-icon">
-
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
         body {
@@ -69,6 +66,7 @@
             border: none;
             border-radius: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px; /* Added margin for spacing between cards */
         }
 
         .logo-img {
@@ -96,9 +94,9 @@
 
         .table th, .table td {
             vertical-align: middle;
+            padding: 12px; /* Added padding for better spacing */
         }
 
-        /* Custom Table Styles */
         .table-hover tbody tr:hover {
             background-color: #f1f1f1;
         }
@@ -113,6 +111,24 @@
             width: 60px;
             height: 60px;
         }
+
+        .dataTables_filter {
+            margin-bottom: 20px; 
+        }
+
+        .dataTables_filter input {
+            margin-left: 10px; 
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .table-responsive {
+            margin-top: 30px; 
+        }
+
+        .btn {
+            margin: 2px; 
+        }
     </style>
 </head>
 <body>
@@ -120,7 +136,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="text-center mb-4 px-3">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid logo-img">
+            <img src="{{ asset('/images/Logo.png') }}" alt="Logo" class="img-fluid logo-img">
         </div>
 
         <ul class="nav flex-column">
@@ -138,7 +154,6 @@
             </li>
         </ul>
 
-        <!-- Logout Button -->
         <a class="nav-link logout-link" href="{{ url('/login') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
     </div>
 
@@ -170,11 +185,10 @@
                     </div>
                 </div>
             </div>
-
             <div class="mt-5">
                 <h4 class="mb-3">Resort Owners</h4>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover bg-white">
+                    <table id="ownersTable" class="table table-bordered table-striped table-hover bg-white">
                         <thead class="table-primary">
                             <tr>
                                 <th>ID</th>
@@ -188,88 +202,79 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($owners as $owner)
+                            @foreach ($owners as $owner)
                                 <tr>
                                     <td>{{ $owner->id }}</td>
                                     <td>{{ $owner->firstname }} {{ $owner->lastname }}</td>
                                     <td>{{ $owner->email }}</td>
                                     <td>{{ $owner->username }}</td>
                                     <td>{{ $owner->resortname }}</td>
-                                    <td>{{ $owner->created_at->format('F d, Y') }}</td> {{-- Customize format as needed --}}
+                                    <td>{{ $owner->created_at->format('F d, Y') }}</td>
                                     <td>{{ ucfirst($owner->status) }}</td>
                                     <td>
-                                    <button type="button"
-                                            class="btn btn-sm btn-danger open-delete-modal"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal"
-                                            data-owner-id="{{ $owner->id }}"
-                                            data-delete-url="{{ route('admin.deleteOwner', $owner->id) }}">
-                                            Delete
-                                    </button>
+                                        <form action="{{ route('admin.updateStatus', $owner->id) }}" method="POST" class="d-flex">
+                                            @csrf
+                                            <button type="submit" name="status" value="pending" class="btn btn-sm btn-warning me-2">
+                                                Pending
+                                            </button>
+                                            <button type="submit" name="status" value="approved" class="btn btn-sm btn-success me-2">
+                                                Approved
+                                            </button>
+                                            <button type="submit" name="status" value="rejected" class="btn btn-sm btn-danger">
+                                                Rejected
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10" class="text-center">No owners found.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
+
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-        <form method="POST" id="deleteForm">
-            @csrf
-            @method('DELETE')
-            <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" id="deleteForm">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this resort owner?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                            <span id="deleteBtnText">Delete</span>
+                            <span id="deleteBtnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="modal-body">
-            Are you sure you want to delete this resort owner?
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
-                <span id="deleteBtnText">Delete</span>
-                <span id="deleteBtnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
-            </button>
-            </div>
-        </form>
         </div>
     </div>
-    </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
     <script>
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteForm = document.getElementById('deleteForm');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-        const deleteBtnText = document.getElementById('deleteBtnText');
-        const deleteBtnSpinner = document.getElementById('deleteBtnSpinner');
-
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const deleteUrl = button.getAttribute('data-delete-url');
-
-            deleteForm.action = deleteUrl;
-
-            // Reset loading state when modal opens
-            confirmDeleteBtn.disabled = false;
-            deleteBtnText.classList.remove('d-none');
-            deleteBtnSpinner.classList.add('d-none');
-        });
-
-        deleteForm.addEventListener('submit', function () {
-            confirmDeleteBtn.disabled = true;
-            deleteBtnText.classList.add('d-none');
-            deleteBtnSpinner.classList.remove('d-none');
+        $(document).ready(function () {
+            $('#ownersTable').DataTable({
+                responsive: true,
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                autoWidth: false,
+                searching: true,
+                ordering: true,
+            });
         });
     </script>
 

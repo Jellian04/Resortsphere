@@ -10,9 +10,11 @@ class User extends Authenticatable
     protected $table = 'registers';  // This tells Laravel to use the 'registers' table
 
     protected $fillable = [
-        'username',
+       'username',
         'email',
         'password',
+        'firstname', // Add firstname here
+        'lastname',  // Add lastname here
     ];
 }
 

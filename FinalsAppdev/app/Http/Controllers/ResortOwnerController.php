@@ -7,35 +7,23 @@ use App\Models\PendingOwner;
 use App\Models\Owner;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ResortOwnerController extends Controller
 {
-    // Show the registration form
     public function create()
     {
-        return view('register-resort');
+        return view('login');
     }
 
-    // Store the form data
     public function store(Request $request)
     {
-        // Check if the email exists in either table
-        $emailExists = PendingOwner::where('email', $request->email)->exists() ||
-                       Owner::where('email', $request->email)->exists();
-    
-        $usernameExists = PendingOwner::where('username', $request->username)->exists() ||
-                          Owner::where('username', $request->username)->exists();
-    
-        if ($emailExists || $usernameExists) {
-            return back()->with('error', 'You have already registered a resort. Only one registration is allowed.');
-        }
-    
         // Validate input
         $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'username' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:pending_owners,email',
+            'username' => 'required|string|max:255|unique:pending_owners,username',
             'password' => 'nullable|string|min:6',
             'zipcode' => 'nullable|string|max:20',
             'resortname' => 'nullable|string|max:255',
@@ -49,23 +37,43 @@ class ResortOwnerController extends Controller
         $imagePath = null;
         if ($request->hasFile('resort_img')) {
             try {
-                $imagePath = $request->file('resort_img')->store('images/resorts', 'public');
+                $imagePath = $request->file('resort_img')->store('images/', 'public');
                 \Log::info('File uploaded successfully:', ['path' => $imagePath]);
             } catch (\Exception $e) {
                 \Log::error('File upload failed:', ['error' => $e->getMessage()]);
                 return back()->with('error', 'There was an error uploading your image. Please try again.');
             }
-        } else {
-            \Log::warning('No file uploaded.');
         }
     
-        // Create pending owner
+        // Check if an entry already exists for this email
+        $existingOwner = PendingOwner::where('email', $request->email)->first();
+    
+        if ($existingOwner) {
+            // Concatenate new resort-related data with commas
+            $existingOwner->update([
+                'zipcode' => $this->concatField($existingOwner->zipcode, $request->zipcode),
+                'resortname' => $this->concatField($existingOwner->resortname, $request->resortname),
+                'resorts_address' => $this->concatField($existingOwner->resorts_address, $request->resorts_address),
+                'type_of_accommodation' => $this->concatField($existingOwner->type_of_accommodation, $request->type_of_accommodation),
+                'description' => $this->concatField($existingOwner->description, $request->description),
+                'resort_img' => $request->hasFile('resort_img')
+                    ? $this->concatField($existingOwner->resort_img, $imagePath)
+                    : $existingOwner->resort_img,
+                'status' => 'pending',
+            ]);
+    
+            return redirect()->route('resort.owner')
+                ->with('success', 'Your resort information was added and is awaiting admin approval.');
+        }
+    
+        // Create new pending owner entry
         PendingOwner::create([
+            'user_id' => Auth::id(),
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
             'email' => $request->email,
             'username' => $request->username,
-            'password' => $request->has('password') ? Hash::make($request->password) : null,
+            'password' => $request->has('password') ? Hash::make($request->password) : null, // Only hash password if provided
             'zipcode' => $request->zipcode,
             'resortname' => $request->resortname,
             'resorts_address' => $request->resorts_address,
@@ -75,33 +83,14 @@ class ResortOwnerController extends Controller
             'status' => 'pending',
         ]);
     
-        // Redirect to the dashboard with a success message
         return redirect()->route('resort.owner')->with('success', 'Registration submitted. Waiting for admin approval.');
     }
-
-    // Show registration form or dashboard based on user registration status
-    public function showRegistrationForm()
+    
+    private function concatField($existing, $new)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'You must be logged in.');
-        }
-
-        $user = Auth::user();
-
-        // Check if the user has already registered or is in pending approval
-        $alreadyRegistered = PendingOwner::where('email', $user->email)->exists() ||
-                            Owner::where('email', $user->email)->exists();
-
-        // Get the registration status for the user
-        $status = PendingOwner::where('email', $user->email)->value('status') ?? 
-                Owner::where('email', $user->email)->value('status') ?? 
-                'not_registered';  // If no status found, assume 'not_registered'
-
-        // Return the view with the status and registration status flag
-        return view('resortowner', compact('status', 'alreadyRegistered'));
+        return $new ? ($existing ? $existing . ', ' . $new : $new) : $existing;
     }
-
-    // Admin approves owner registration
+    
     public function approveOwner($ownerId)
     {
         $pendingOwner = PendingOwner::find($ownerId);
@@ -129,7 +118,6 @@ class ResortOwnerController extends Controller
         return redirect()->back()->with('error', 'Owner not found.');
     }
 
-    // Dashboard for resort owners to view registration status
     public function resortDashboard()
     {
         $user = Auth::user();
@@ -156,30 +144,184 @@ class ResortOwnerController extends Controller
         ]);
     }
     
-    // Check registration status and return the appropriate view
     public function index()
     {
         $user = Auth::user();
     
-        // Get the pending or approved owner record
-        $pendingOwner = PendingOwner::where('email', $user->email)->orWhere('username', $user->username)->first();
-        $owner = Owner::where('email', $user->email)->orWhere('username', $user->username)->first();
+        // Filter resorts for the logged-in user
+        $pendingResorts = PendingOwner::where('email', $user->email)
+                                      ->orWhere('username', $user->username)
+                                      ->get();
     
-        // Determine status and data
+        $approvedResorts = Owner::where('email', $user->email)
+                                ->orWhere('username', $user->username)
+                                ->get();
+    
+        $pendingOwner = $pendingResorts->first();
+        $owner = $approvedResorts->first();
+    
         if ($owner) {
             $status = 'approved';
-            $ownerData = $owner;
+            $statusMessage = 'Your resort has been approved! You can re-register.';
         } elseif ($pendingOwner) {
             $status = 'pending';
-            $ownerData = $pendingOwner;
+            $statusMessage = 'Your request is still pending. You can re-submit your registration if necessary.';
         } else {
             $status = 'not_registered';
-            $ownerData = null;
+            $statusMessage = 'You have not registered yet. Please fill out the registration form.';
         }
     
         $alreadyRegistered = $status !== 'not_registered';
     
-        return view('resortowner', compact('status', 'alreadyRegistered', 'ownerData'));
+        return view('resortowner', compact(
+            'pendingResorts',
+            'approvedResorts',
+            'status',
+            'statusMessage',
+            'alreadyRegistered'
+        ));
     }
     
-}   
+    public function viewResorts()
+    {
+        $userId = Auth::id(); // Get the logged-in user ID
+    
+        // Fetch resorts from both the 'owners' and 'pending_owners' tables for the logged-in user
+        $approvedResorts = Owner::where('user_id', $userId)->get();  // Approved resorts
+        $pendingResorts = PendingOwner::where('user_id', $userId)->get();  // Pending resorts
+    
+        // Pass both approved and pending resorts to the view
+        return view('resortownerview', compact('approvedResorts', 'pendingResorts'));
+    }
+    
+    public function showResorts()
+    {
+        $approvedResorts = DB::table('owners')->where('status', 'approved')->get();
+        $pendingResorts = DB::table('owners')->where('status', 'pending')->get();
+    
+        return view('resort.owner_dashboard', compact('approvedResorts', 'pendingResorts'));
+    }
+    
+    public function edit($id)
+    {
+        $resort = Owner::findOrFail($id);
+        return view('editresort', compact('resort'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $resort = Owner::findOrFail($id);
+
+        $request->validate([
+            'resortname' => 'required|string|max:255',
+            'resorts_address' => 'required|string',
+            'description' => 'nullable|string',
+        ]);
+
+        $resort->update($request->only(['resortname', 'resorts_address', 'description']));
+
+        return redirect()->route('resortownerview')->with('success', 'Resort updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $resort = Owner::findOrFail($id);
+        $resort->delete();
+
+        return redirect()->route('resortownerview')->with('success', 'Resort deleted successfully.');
+    }
+
+    public function registerResort(Request $request)
+    {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in first!');
+        }
+    
+        // Validate input
+        $validatedData = $request->validate([
+            'zipcode' => 'required|string|max:10',
+            'resortname' => 'required|string|max:255',
+            'resorts_address' => 'required|string|max:255',
+            'type_of_accommodation' => 'required|string',
+            'description' => 'required|string',
+            'resort_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+    
+        // Get the current logged-in user's ID
+        $userId = Auth::id();
+    
+        // If userId is null, it means the user is not logged in
+        if ($userId === null) {
+            return redirect()->route('login')->with('error', 'You must be logged in to register a resort.');
+        }
+    
+        // Check if the user has already registered a resort (based on user_id)
+        $existingResort = PendingOwner::where('user_id', $userId)->first();
+    
+        if ($existingResort) {
+            // If the user has already registered a resort, update only the resort-specific fields
+            $existingResort->update([
+                'zipcode' => $request->zipcode,
+                'resortname' => $request->resortname,
+                'resorts_address' => $request->resorts_address,
+                'type_of_accommodation' => $request->type_of_accommodation,
+                'description' => $request->description,
+                'resort_img' => $request->hasFile('resort_img') ? $request->file('resort_img')->store('resorts_images') : $existingResort->resort_img, // Update image if provided
+                'status' => 'pending',  // Status stays 'pending' until approval
+                'updated_at' => now(),
+            ]);
+        } else {
+            // If the user has not registered a resort, create a new entry (with all the required fields)
+            PendingOwner::create([
+                'user_id' => $userId,  // Link to the current logged-in user
+                'firstname' => Auth::user()->firstname, // Preserve the user's first name
+                'lastname' => Auth::user()->lastname,   // Preserve the user's last name
+                'email' => Auth::user()->email,         // Preserve the user's email
+                'username' => Auth::user()->username,   // Preserve the user's username
+                'password' => Auth::user()->password,   // Preserve the user's password
+                'zipcode' => $request->zipcode,
+                'resortname' => $request->resortname,
+                'resorts_address' => $request->resorts_address,
+                'type_of_accommodation' => $request->type_of_accommodation,
+                'description' => $request->description,
+                'resort_img' => $request->hasFile('resort_img') ? $request->file('resort_img')->store('resorts_images') : null,
+                'status' => 'pending',  // Default status is 'pending' before admin approval
+                'user_id' => $userId,  // Make sure the user_id is assigned
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    
+        // Return the response or redirect
+        return redirect()->route('resortowner')->with('statusMessage', 'Resort registration submitted for approval.');
+    }
+
+    public function upload(Request $request)
+    {
+        if ($request->hasFile('resort_img')) {
+            $file = $request->file('resort_img');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/resort_images', $filename);
+    
+            return response()->json(['success' => true, 'filename' => $filename]);
+        }
+    
+        return response()->json(['success' => false], 400);
+    }
+
+    public function delete(Request $request)
+    {
+        $filename = $request->filename;
+
+        // Delete the file from storage
+        $path = public_path('uploads/' . $filename);
+        if (file_exists($path)) {
+            unlink($path);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
+
+}

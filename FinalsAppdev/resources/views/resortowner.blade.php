@@ -1,366 +1,396 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resort Owner Dashboard</title>
     <link rel="icon" href="{{ asset('images/Logo.png') }}" type="image/x-icon">
-
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f5f6fa;
-            overflow-x: hidden;
-            margin: 0;
-        }
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.2/dropzone.min.css" rel="stylesheet">    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .sidebar {
-            height: 100vh;
-            width: 250px;
-            background-color: #2A4D86;
-            color: white;
-            position: fixed;
-            padding-top: 1.5rem;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-        }
+        <style>
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background-color: #f5f6fa;
+                overflow-x: hidden;
+                margin: 0;
+            }
 
-        .sidebar h4 {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
+            .sidebar {
+                height: 100vh;
+                width: 250px;
+                background-color: #2A4D86;
+                color: white;
+                position: fixed;
+                padding-top: 1.5rem;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+                display: flex;
+                flex-direction: column;
+            }
 
-        .sidebar .nav-link {
-            color: #ffffffcc;
-            padding: 14px 24px;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
+            .sidebar h4 {
+                font-weight: 700;
+                font-size: 1.5rem;
+            }
 
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: #1f3a64;
-            color: #fff;
-        }
+            .sidebar .nav-link {
+                color: #ffffffcc;
+                padding: 14px 24px;
+                font-size: 1.1rem;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+            }
 
-        .navbar-custom {
-            background-color: #2A5677;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            color: white;
-            border-radius: 10px;
-        }
+            .sidebar .nav-link:hover,
+            .sidebar .nav-link.active {
+                background-color: #1f3a64;
+                color: #fff;
+            }
 
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
+            .navbar-custom {
+                background-color: #2A5677;
+                height: 70px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 20px;
+                color: white;
+                border-radius: 10px;
+            }
 
-        .form-custom {
-            background-color: #fff;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            padding: 20px;
-        }
+            .main-content {
+                margin-left: 250px;
+                padding: 20px;
+            }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+            .form-custom {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                padding: 20px;
+            }
 
-        .form-group label {
-            font-weight: 600;
-        }
+            .form-group {
+                margin-bottom: 1rem;
+            }
 
-        .btn-custom {
-            background-color: #2A4D86;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 10px;
-            padding: 10px 20px;
-        }
+            .form-group label {
+                font-weight: 600;
+            }
 
-        .btn-custom:hover {
-            background-color: #1f3a64;
-        }
+            .btn-custom {
+                background-color: #2A4D86;
+                color: white;
+                font-size: 1.1rem;
+                font-weight: 700;
+                border-radius: 10px;
+                padding: 10px 20px;
+            }
 
-        .logout-link {
-            margin-top: auto;
-            color: white;
-            padding: 12px 24px;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            font-weight: 700;
-            transition: background-color 0.2s ease;
-        }
+            .btn-custom:hover {
+                background-color: #1f3a64;
+            }
 
-        .logout-link:hover {
-            background-color: #1f3a64;
-        }
+            .logout-link {
+                margin-top: auto;
+                color: white;
+                padding: 12px 24px;
+                font-size: 1.1rem;
+                border-radius: 10px;
+                font-weight: 700;
+                transition: background-color 0.2s ease;
+            }
 
-        /* Image preview */
-        #image-preview {
-            max-width: 200px;
-            margin-top: 10px;
-        }
+            .logout-link:hover {
+                background-color: #1f3a64;
+            }
 
-        .error {
-            color: red;
-            font-size: 0.9rem;
-        }
+            /* Image preview */
+            #image-preview {
+                max-width: 200px;
+                margin-top: 10px;
+            }
 
-        #loadingSpinner {
-            display: none;
-        }
+            .error {
+                color: red;
+                font-size: 0.9rem;
+            }
 
-        input[readonly], select[readonly], textarea[readonly] {
-            background-color: #e9ecef;
-        }
-    </style>
-</head>
+            #loadingSpinner {
+                display: none;
+            }
 
-<body>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
+            input[readonly], select[readonly], textarea[readonly] {
+                background-color: #e9ecef;
+            }
+            #myDropzone {
+                min-height: 200px;
+                border: 2px dashed #ccc;  /* Add a border to visualize the Dropzone area */
+                background-color: #f9f9f9;
+                padding: 20px;
+            }
+        </style>
+        
+    </head>
+    <body>
+        <!-- Sidebar -->
+        <div class="sidebar">
         <div class="text-center mb-4 px-3">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 80px;">
-        </div>
+                <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="img-fluid logo-img">
+            </div>
 
-        <ul class="nav flex-column">
-            <li class="nav-item px-3 mb-3">
-                <span class="fw-bold d-block text-center">
-                    @if(Auth::check())
-                    Welcome, {{ Auth::user()->username ?? Auth::user()->name ?? 'User' }}!
-                    @else
-                        Welcome, Guest!
-                    @endif
-                </span>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('/welcome') }}" target="_blank"><i class="bi bi-globe me-2"></i>View Website</a>
-            </li>
-        </ul>
-
-        <a class="nav-link logout-link mt-auto" href="{{ url('/login') }}">
-            <i class="bi bi-box-arrow-right me-2"></i>Logout
-        </a>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="navbar-custom shadow-sm flex-column align-items-start py-2">
-            <h1 class="fw-bold fs-5 mb-1">Welcome, Resort Owner</h1>
-            <p class="mb-0">Registering a resort needs admin approval.</p>
-        </div>
-
-        <div class="container mt-4">
-            <div id="alert-box">
-                @if($status === 'approved')
-                    <div class="alert alert-success">Your resort has been approved!</div>
-                @elseif($status === 'pending')
-                    <div class="alert alert-warning">Your request is still pending.</div>
-                @elseif($status === 'rejected')
-                    <div class="alert alert-danger">Your request was rejected.</div>
-                @else
-                    <div id="form-container">
-                        @if($alreadyRegistered)
-                            <div class="alert alert-warning">
-                                You have already submitted your resort registration. Please wait for admin approval.
-                            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item px-3 mb-3">
+                    <span class="fw-bold d-block text-center">
+                        @if(Auth::check())
+                        Welcome, {{ Auth::user()->username ?? Auth::user()->name ?? 'User' }}!
                         @else
-                            <div class="form-custom">
-                                <h5 class="mb-4">Resort Owner Registration</h5>
-                                <form id="resort-registration-form" method="POST" enctype="multipart/form-data" action="{{ route('resort.register') }}">
-                                    @csrf
+                            Welcome, Guest!
+                        @endif
+                    </span>
+                </li>
 
-                                    <div class="row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="firstname">First Name</label>
-                                            <input type="text" name="firstname" id="firstname" class="form-control"  
-                                            value="{{ old('firstname', $user->firstname ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="firstname-error"></div>
-                                        </div>
-                                        <div class="col-md-6 form-group">
-                                            <label for="lastname">Last Name</label>
-                                            <input type="text" name="lastname" id="lastname" class="form-control" 
-                                             value="{{ old('lastname', $user->lastname ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="lastname-error"></div>
-                                        </div>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/resortownerview') }}">
+                        <i class="bi bi-building me-2"></i>My Resorts
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/welcome') }}"><i class="bi bi-globe me-2"></i>View Website</a>
+                </li>
+            </ul>
+
+            <a class="nav-link logout-link mt-auto" href="{{ url('/login') }}">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="navbar-custom shadow-sm flex-column align-items-start py-2 mb-3">
+                <h1 class="fw-bold fs-5 mb-1">Welcome, Resort Owner</h1>
+                <p class="mb-0">Registering a resort needs admin approval. You can submit multiple resort registrations. Previous entries will still be processed.</p>
+            </div>
+
+            <div id="alert-box">
+                @if(isset($statusMessage))
+                    <div class="alert alert-info p-3">
+                        {{ $statusMessage }}
+                    </div>
+                        <div id="form-container">
+                        <div class="form-custom">
+                            <h5 class="mb-4">Resort Owner Registration</h5>
+                            <form id="resort-registration-form" method="POST" enctype="multipart/form-data" action="{{ route('resort.register') }}">
+                                @csrf
+
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="firstname">First Name</label>
+                                        <input type="text" name="firstname" id="firstname" class="form-control"  
+                                            value="{{ old('firstname', $user->firstname ?? '') }}" required>
+
+                                        <div class="error" id="firstname-error"></div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="email">Email</label>
-                                            <input type="email" name="email" id="email" class="form-control" 
-                                            value="{{ old('email', $user->email ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="email-error"></div>
-                                        </div>
-                                        <div class="col-md-6 form-group">
-                                            <label for="username">Username</label>
-                                            <input type="text" name="username" id="username" class="form-control" 
-                                            value="{{ old('username', $user->username ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="username-error"></div>
-                                        </div>
+                                    <div class="col-md-6 form-group">
+                                        <label for="lastname">Last Name</label>
+                                        <input type="text" name="lastname" id="lastname" class="form-control" 
+                                        value="{{ old('lastname', $user->lastname ?? '') }}" 
+                                        required>
+                                        <div class="error" id="lastname-error"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" name="email" id="email" class="form-control" 
+                                        value="{{ old('email', $user->email ?? '') }}" 
+                                        required>
+                                        <div class="error" id="email-error"></div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="zipcode">Zipcode</label>
-                                            <input type="text" name="zipcode" id="zipcode" class="form-control"  
-                                            value="{{ old('zipcode', $user->zipcode ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="zipcode-error"></div>
-                                        </div>
-                                        <div class="col-md-6 form-group">
-                                            <label for="resortname">Resort Name</label>
-                                            <input type="text" name="resortname" id="resortname" class="form-control" 
-                                            value="{{ old('resortname', $user->resortname ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="resortname-error"></div>
-                                        </div>
+                                    <div class="col-md-6 form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" name="username" id="username" class="form-control" 
+                                        value="{{ old('username', $user->username ?? '') }}" required>
+                                        <div class="error" id="username-error"></div>
                                     </div>
-                                    <div class="row">
-                                    <div class="form-group">
-                                            <label for="resort_name">Resort Address</label>
-                                            <input type="text" name="resorts_address" id="resorts_address" class="form-control" 
-                                            value="{{ old('resorts_address', $user->resorts_address ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                            <div class="error" id="resorts_address-error"></div>
-                                        </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="zipcode">Zipcode</label>
+                                        <input type="text" name="zipcode" id="zipcode" class="form-control"  
+                                        value="{{ old('zipcode', $user->zipcode ?? '') }}" 
+                                        required>
+                                        <div class="error" id="zipcode-error"></div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="password">Password</label>
-                                            <div class="input-group">
-                                                <input type="password" id="password" name="password" class="form-control" minlength="6">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
-                                                        <i class="bi bi-eye" id="toggleIcon"></i>
-                                                    </span>
-                                                </div>
+                                    <div class="col-md-6 form-group">
+                                        <label for="resortname">Resort Name</label>
+                                        <input type="text" name="resortname" id="resortname" class="form-control" 
+                                        value="{{ old('resortname', $user->resortname ?? '') }}" 
+                                        required>
+                                        <div class="error" id="resortname-error"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                <div class="form-group">
+                                        <label for="resort_name">Resort Address</label>
+                                        <input type="text" name="resorts_address" id="resorts_address" class="form-control" 
+                                        value="{{ old('resorts_address', $user->resorts_address ?? '') }}" 
+                                        required>
+                                        <div class="error" id="resorts_address-error"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="password">Password</label>
+                                        <div class="input-group">
+                                            <input type="password" id="password" name="password" class="form-control" minlength="6">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                                </span>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 form-group">
-                                            <label for="type_of_accommodation">Accommodation Type</label>
-                                            <select name="type_of_accommodation" id="type_of_accommodation" class="form-control" 
-                                            value="{{ old('type_of_accommodation', $user->type_of_accommodation ?? '') }}" 
-                                            @if($status !== 'not_registered') readonly @endif required>
-                                                <option value="" disabled selected>Select accommodation type</option>
-                                                <option value="hotel">Hotel</option>
-                                                <option value="cottage">Cottage</option>
-                                                <option value="villa">Villa</option>
-                                                <option value="bungalow">Bungalow</option>
-                                                <option value="resort">Resort</option>
-                                                <option value="hostel">Hostel</option>
-                                            </select>
-                                            <div class="error" id="type_of_accommodation-error"></div>
-                                        </div>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label for="type_of_accommodation">Accommodation Type</label>
+                                        <select name="type_of_accommodation" id="type_of_accommodation" class="form-control" 
+                                        value="{{ old('type_of_accommodation', $user->type_of_accommodation ?? '') }}" 
+                                        required>
+                                            <option value="" disabled selected>Select accommodation type</option>
+                                            <option value="hotel">Hotel</option>
+                                            <option value="cottage">Cottage</option>
+                                            <option value="villa">Villa</option>
+                                            <option value="bungalow">Bungalow</option>
+                                            <option value="resort">Resort</option>
+                                            <option value="hostel">Hostel</option>
+                                            <option value="apartment">Apartment</option>
+                                            <option value="guesthouse">Guesthouse</option>
+                                            <option value="loft">Loft</option>
+                                            <option value="farmhouse">Farmhouse</option>
+                                            <option value="mansion">Mansion</option>
+                                            <option value="AirBnB">AirBnB</option>
+                                            <option value="penthouse">Penthouse</option>
+                                        </select>
+                                        <div class="error" id="type_of_accommodation-error"></div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="description">Description</label>
-                                        <textarea name="description" id="description" class="form-control" rows="4" 
-                                        value="{{ old('description', $user->description ?? '') }}" 
-                                        @if($status !== 'not_registered') readonly @endif required>{{ old('description', $user->description ?? '') }}</textarea>
-                                        <div class="error" id="description-error"></div>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea name="description" id="description" class="form-control" rows="4" 
+                                    value="{{ old('description', $user->description ?? '') }}" 
+                                    required>{{ old('description', $user->description ?? '') }}</textarea>
+                                    <div class="error" id="description-error"></div>
+                                </div>
 
-                                    <div class="form-group">
-                                        <label for="resort_img">Resort Image</label>
-                                        <input type="file" name="resort_img" id="resort_img" class="form-control" accept="image/*">
-                                        <img id="image-preview" src="#" alt="Image Preview" style="display: none;" class="img-thumbnail mt-2" />
-                                        <div class="error" id="image-error"></div>
-                                    </div>
+                                <div id="loadingSpinner" style="display:none;">
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </div>
+                            </form>
 
-                                    <div class="mt-3">
-                                        <button type="submit" id="submitButton" class="btn btn-custom w-100">Submit Registration</button>
-                                        @if($status !== 'not_registered') disabled @endif </button>
-                                    </div>
-
-                                    <div id="loadingSpinner" style="display:none;">
-                                        <i class="fa fa-spinner fa-spin"></i>
-                                    </div>
-                                </form>
+                            <div class="container mt-5">
+                                    <form action="{{ route('upload.route') }}" class="dropzone" id="myDropzone">
+                                        @csrf
+                                    </form>
                             </div>
-                        @endif
+
+                            <div class="mt-3">
+                                    <button type="submit" id="submitButton" class="btn btn-custom w-100">Submit Registration</button>
+                            </div>
+                        </div>
+                    </div>
                     </div>
                 @endif
             </div>
         </div>
-    </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.2/min/dropzone.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            // Dropzone configuration
+            var myDropzone = new Dropzone("#myDropzone", {
+                url: "{{ route('upload.route') }}",
+                paramName: 'resort_img',
+                maxFilesize: 2, // MB
+                acceptedFiles: 'image/*',
+                addRemoveLinks: false,
+                dictDefaultMessage: "Drag and drop images here or click to upload",
+                dictRemoveFile: "Remove",
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                // Customize the preview template to show the file name and size below the image
+                previewTemplate: `
+                    <div class="dz-preview dz-file-preview">
+                        <div class="dz-image"><img data-dz-thumbnail /></div>
+                        <div class="dz-details">
+                            <div class="dz-filename"><span data-dz-name></span></div>
+                            <div class="dz-size" data-dz-size></div>
+                        </div>
+                        <div class="dz-remove" data-dz-remove><i class="bi bi-x-circle"></i> Remove</div>
+                    </div>`,
 
-    <script>
-    // Show password toggle functionality
-    document.getElementById('togglePassword').addEventListener('click', function() {
-        var passwordField = document.getElementById('password');
-        var toggleIcon = document.getElementById('toggleIcon');
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-            toggleIcon.classList.replace("bi-eye", "bi-eye-slash");
-        } else {
-            passwordField.type = "password";
-            toggleIcon.classList.replace("bi-eye-slash", "bi-eye");
-        }
-    });
+                // Handle server response after upload
+                success: function (file, response) {
+                    console.log("File uploaded:", response);
+                    // Store filename for potential removal later
+                    file.uploadedFilename = response.filename || response.fileName || response;
+                },
 
-    // Preview image before uploading
-    document.getElementById("resort_img").addEventListener("change", function(event) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById("image-preview").style.display = "block";
-            document.getElementById("image-preview").src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-    });
+                removedfile: function (file) {
+                    // Remove the file preview from the DOM
+                    if (file.previewElement) {
+                        file.previewElement.remove();
+                    }
 
-    // Form submit
-    document.getElementById("resort-registration-form").onsubmit = function(event) {
-        event.preventDefault(); // Prevent default form submission
-        var form = this;
+                    // Delete from server if file was uploaded
+                    if (file.uploadedFilename) {
+                        fetch("{{ route('delete.uploaded.image') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ filename: file.uploadedFilename })
+                        }).then(response => {
+                            if (response.ok) {
+                                console.log("File deleted from server");
+                            } else {
+                                console.error("Failed to delete file from server");
+                            }
+                        });
+                    } else {
+                        console.log("Removed local file only (not uploaded yet)");
+                    }
+                }
+            });
 
-        // Show the loading spinner
-        document.getElementById("loadingSpinner").style.display = "inline-block";
-
-        // Disable the submit button and inputs after form submission
-        document.getElementById("submitButton").disabled = true;
-        Array.from(form.elements).forEach(function(input) {
-            if (input.type !== "submit") {
-                input.setAttribute('readonly', true);
-            }
-        });
-
-        // Submit the form via AJAX or proceed with normal form submission
-        // Here we'll use a setTimeout to simulate the form submission
-        setTimeout(function() {
-            // Simulate form submission
-            form.submit(); // You can replace this with AJAX to handle submission without a page reload.
-        }, 2000); // Simulate a 2-second delay for submission (remove if using AJAX)
-    };
-</script>
-</body>
-</html>
+            // Optional: Add event listeners for dynamic behavior on the "Remove" button
+            $(document).on('click', '.dz-remove', function () {
+                var file = Dropzone.instances[0].getFilesWithStatus(Dropzone.ADDED)[0];
+                if (file) {
+                    Dropzone.instances[0].removeFile(file);
+                }
+            });
+        </script>
+    </body>
+    </html>
