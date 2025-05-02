@@ -136,12 +136,11 @@
                 padding: 20px;
             }
         </style>
-        
-    </head>
-    <body>
+</head>
+<body>
         <!-- Sidebar -->
         <div class="sidebar">
-        <div class="text-center mb-4 px-3">
+            <div class="text-center mb-4 px-3">
                 <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="img-fluid logo-img">
             </div>
 
@@ -188,7 +187,7 @@
                     <div class="alert alert-info p-3">
                         {{ $statusMessage }}
                     </div>
-                        <div id="form-container">
+                    <div id="form-container">
                         <div class="form-custom">
                             <h5 class="mb-4">Resort Owner Registration</h5>
                             <form id="resort-registration-form" method="POST" enctype="multipart/form-data" action="{{ route('resort.register') }}">
@@ -198,15 +197,14 @@
                                     <div class="col-md-6 form-group">
                                         <label for="firstname">First Name</label>
                                         <input type="text" name="firstname" id="firstname" class="form-control"  
-                                            value="{{ old('firstname', $user->firstname ?? '') }}" required>
-
+                                            value="{{ old('firstname', Auth::user()->firstname ?? '') }}" required>
                                         <div class="error" id="firstname-error"></div>
                                     </div>
 
                                     <div class="col-md-6 form-group">
                                         <label for="lastname">Last Name</label>
                                         <input type="text" name="lastname" id="lastname" class="form-control" 
-                                        value="{{ old('lastname', $user->lastname ?? '') }}" 
+                                        value="{{ old('lastname', Auth::user()->lastname ?? '') }}" 
                                         required>
                                         <div class="error" id="lastname-error"></div>
                                     </div>
@@ -216,7 +214,7 @@
                                     <div class="col-md-6 form-group">
                                         <label for="email">Email</label>
                                         <input type="email" name="email" id="email" class="form-control" 
-                                        value="{{ old('email', $user->email ?? '') }}" 
+                                        value="{{ old('email', Auth::user()->email ?? '') }}" 
                                         required>
                                         <div class="error" id="email-error"></div>
                                     </div>
@@ -224,7 +222,7 @@
                                     <div class="col-md-6 form-group">
                                         <label for="username">Username</label>
                                         <input type="text" name="username" id="username" class="form-control" 
-                                        value="{{ old('username', $user->username ?? '') }}" required>
+                                        value="{{ old('username', Auth::user()->username ?? '') }}" required>
                                         <div class="error" id="username-error"></div>
                                     </div>
                                 </div>
@@ -233,7 +231,7 @@
                                     <div class="col-md-6 form-group">
                                         <label for="zipcode">Zipcode</label>
                                         <input type="text" name="zipcode" id="zipcode" class="form-control"  
-                                        value="{{ old('zipcode', $user->zipcode ?? '') }}" 
+                                        value="{{ old('zipcode', Auth::user()->zipcode ?? '') }}" 
                                         required>
                                         <div class="error" id="zipcode-error"></div>
                                     </div>
@@ -241,17 +239,17 @@
                                     <div class="col-md-6 form-group">
                                         <label for="resortname">Resort Name</label>
                                         <input type="text" name="resortname" id="resortname" class="form-control" 
-                                        value="{{ old('resortname', $user->resortname ?? '') }}" 
+                                        value="{{ old('resortname', Auth::user()->resortname ?? '') }}" 
                                         required>
                                         <div class="error" id="resortname-error"></div>
                                     </div>
                                 </div>
 
                                 <div class="row">
-                                <div class="form-group">
+                                    <div class="form-group">
                                         <label for="resort_name">Resort Address</label>
                                         <input type="text" name="resorts_address" id="resorts_address" class="form-control" 
-                                        value="{{ old('resorts_address', $user->resorts_address ?? '') }}" 
+                                        value="{{ old('resorts_address', Auth::user()->resorts_address ?? '') }}" 
                                         required>
                                         <div class="error" id="resorts_address-error"></div>
                                     </div>
@@ -269,10 +267,11 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6 form-group">
                                         <label for="type_of_accommodation">Accommodation Type</label>
                                         <select name="type_of_accommodation" id="type_of_accommodation" class="form-control" 
-                                        value="{{ old('type_of_accommodation', $user->type_of_accommodation ?? '') }}" 
+                                        value="{{ old('type_of_accommodation', Auth::user()->type_of_accommodation ?? '') }}" 
                                         required>
                                             <option value="" disabled selected>Select accommodation type</option>
                                             <option value="hotel">Hotel</option>
@@ -291,12 +290,12 @@
                                         </select>
                                         <div class="error" id="type_of_accommodation-error"></div>
                                     </div>
+                                </div>
 
                                 <div class="form-group">
                                     <label for="description">Description</label>
                                     <textarea name="description" id="description" class="form-control" rows="4" 
-                                    value="{{ old('description', $user->description ?? '') }}" 
-                                    required>{{ old('description', $user->description ?? '') }}</textarea>
+                                    required>{{ old('description', Auth::user()->description ?? '') }}</textarea>
                                     <div class="error" id="description-error"></div>
                                 </div>
 
@@ -306,91 +305,60 @@
                             </form>
 
                             <div class="container mt-5">
-                                    <form action="{{ route('upload.route') }}" class="dropzone" id="myDropzone">
-                                        @csrf
-                                    </form>
+                                <form action="{{ route('upload.route') }}" class="dropzone" id="myDropzone">
+                                    @csrf
+                                </form>
                             </div>
 
                             <div class="mt-3">
-                                    <button type="submit" id="submitButton" class="btn btn-custom w-100">Submit Registration</button>
+                            <button type="button" id="submitButton" class="btn btn-custom w-100">Submit Registration</button>
                             </div>
                         </div>
-                    </div>
                     </div>
                 @endif
             </div>
         </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.2/min/dropzone.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
         <script>
-            // Dropzone configuration
-            var myDropzone = new Dropzone("#myDropzone", {
-                url: "{{ route('upload.route') }}",
-                paramName: 'resort_img',
-                maxFilesize: 2, // MB
-                acceptedFiles: 'image/*',
-                addRemoveLinks: false,
-                dictDefaultMessage: "Drag and drop images here or click to upload",
-                dictRemoveFile: "Remove",
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
+            $(document).ready(function () {
+                // Handle the form submission
+                $('#submitButton').click(function () {
+                    var form = $('#resort-registration-form');
 
-                // Customize the preview template to show the file name and size below the image
-                previewTemplate: `
-                    <div class="dz-preview dz-file-preview">
-                        <div class="dz-image"><img data-dz-thumbnail /></div>
-                        <div class="dz-details">
-                            <div class="dz-filename"><span data-dz-name></span></div>
-                            <div class="dz-size" data-dz-size></div>
-                        </div>
-                        <div class="dz-remove" data-dz-remove><i class="bi bi-x-circle"></i> Remove</div>
-                    </div>`,
+                    // Ensure the form is valid before submission
+                    if (form[0].checkValidity()) {
+                        // Show the loading spinner
+                        $('#loadingSpinner').show();
 
-                // Handle server response after upload
-                success: function (file, response) {
-                    console.log("File uploaded:", response);
-                    // Store filename for potential removal later
-                    file.uploadedFilename = response.filename || response.fileName || response;
-                },
-
-                removedfile: function (file) {
-                    // Remove the file preview from the DOM
-                    if (file.previewElement) {
-                        file.previewElement.remove();
-                    }
-
-                    // Delete from server if file was uploaded
-                    if (file.uploadedFilename) {
-                        fetch("{{ route('delete.uploaded.image') }}", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        // Perform the AJAX form submission
+                        $.ajax({
+                            url: form.attr('action'),
+                            type: form.attr('method'),
+                            data: new FormData(form[0]),
+                            contentType: false,
+                            processData: false,
+                            success: function (response) {
+                                // Handle the response (e.g., success message)
+                                $('#loadingSpinner').hide();
+                                alert('Registration successful sent waiting for approval!');
+                                // Optionally, reset form or navigate
                             },
-                            body: JSON.stringify({ filename: file.uploadedFilename })
-                        }).then(response => {
-                            if (response.ok) {
-                                console.log("File deleted from server");
-                            } else {
-                                console.error("Failed to delete file from server");
+                            error: function (xhr, status, error) {
+                                // Handle error (e.g., display error message)
+                                $('#loadingSpinner').hide();
+                                alert('An error occurred. Please try again.');
                             }
                         });
                     } else {
-                        console.log("Removed local file only (not uploaded yet)");
+                        // If the form is not valid, show an alert
+                        alert('Please fill in all required fields.');
                     }
-                }
-            });
-
-            // Optional: Add event listeners for dynamic behavior on the "Remove" button
-            $(document).on('click', '.dz-remove', function () {
-                var file = Dropzone.instances[0].getFilesWithStatus(Dropzone.ADDED)[0];
-                if (file) {
-                    Dropzone.instances[0].removeFile(file);
-                }
+                });
             });
         </script>
-    </body>
-    </html>
+</body>
+</html
