@@ -8,6 +8,9 @@ class AddUserIdToPendingOwnersTable extends Migration
 {
     public function up()
     {
+        Schema::table('owners', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable();
+        });
         Schema::table('pending_owners', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id')->nullable();
         });
@@ -15,8 +18,11 @@ class AddUserIdToPendingOwnersTable extends Migration
 
     public function down()
     {
-        Schema::table('pending_owners', function (Blueprint $table) {
+        Schema::table('owners', function (Blueprint $table) {
             $table->dropColumn('user_id');
+        });
+        Schema::table('pending_owners', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable();
         });
     }
 }

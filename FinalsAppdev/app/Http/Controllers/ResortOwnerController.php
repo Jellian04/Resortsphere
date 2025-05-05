@@ -163,13 +163,17 @@ class ResortOwnerController extends Controller
         if ($owner) {
             $status = 'approved';
             $statusMessage = 'Your resort has been approved! You can re-register.';
-        } elseif ($pendingOwner) {
+        } elseif ($pendingOwner && $pendingOwner->status == 'pending') {
             $status = 'pending';
             $statusMessage = 'Your request is still pending. You can re-submit your registration if necessary.';
-        } else {
+        } elseif ($pendingOwner && $pendingOwner->status == 'rejected') {
+            $status = 'rejected';
+            $rejectionReason = 'Your resort did not meet the required standards or the submitted information was incomplete.';
+            $statusMessage = "Your request was rejected. Reason: $rejectionReason. You can re-submit your registration if necessary.";        } else {
             $status = 'not_registered';
             $statusMessage = 'You have not registered yet. Please fill out the registration form.';
         }
+        
     
         $alreadyRegistered = $status !== 'not_registered';
     

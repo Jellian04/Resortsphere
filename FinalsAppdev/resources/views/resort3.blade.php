@@ -150,6 +150,27 @@
         .collapse {
             overflow: hidden;
         }
+
+        .home-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            z-index: 4;
+            transition: transform 0.3s ease;
+            position: sticky; 
+            right: 20px; 
+            bottom: 5000px; 
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .home-btn .bi {
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -272,6 +293,10 @@
             @endforeach
         </div>
     </div>
+          <!-- Home Button -->
+        <a href="{{ url('/welcome') }}" class="home-btn d-flex justify-content-center align-items-center position-absolute bottom-0 end-0 m-3 rounded-circle bg-white shadow-lg p-3">
+            <i class="bi bi-house-door fs-4 text-dark"></i>
+        </a>
 </section>
 
     <!-- FOOTER -->
@@ -282,5 +307,13 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('scroll', function() {
+            const homeButton = document.querySelector('.home-btn');
+            const scrollPosition = window.scrollY; 
+            const parallaxEffect = scrollPosition * 0.5; 
+            homeButton.style.transform = `translateY(${parallaxEffect}px)`;
+        });
+    </script>
 </body>
 </html>  

@@ -325,16 +325,12 @@
 
         <script>
             $(document).ready(function () {
-                // Handle the form submission
                 $('#submitButton').click(function () {
                     var form = $('#resort-registration-form');
 
-                    // Ensure the form is valid before submission
                     if (form[0].checkValidity()) {
-                        // Show the loading spinner
                         $('#loadingSpinner').show();
 
-                        // Perform the AJAX form submission
                         $.ajax({
                             url: form.attr('action'),
                             type: form.attr('method'),
@@ -342,19 +338,15 @@
                             contentType: false,
                             processData: false,
                             success: function (response) {
-                                // Handle the response (e.g., success message)
                                 $('#loadingSpinner').hide();
                                 alert('Registration successful sent waiting for approval!');
-                                // Optionally, reset form or navigate
                             },
                             error: function (xhr, status, error) {
-                                // Handle error (e.g., display error message)
                                 $('#loadingSpinner').hide();
                                 alert('An error occurred. Please try again.');
                             }
                         });
                     } else {
-                        // If the form is not valid, show an alert
                         alert('Please fill in all required fields.');
                     }
                 });

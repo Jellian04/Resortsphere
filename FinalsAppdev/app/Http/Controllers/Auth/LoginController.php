@@ -4,58 +4,53 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\ResortOwner; // model connected to 'registers' table
-use Illuminate\Support\Facades\Hash;  // Import the Hash facade
+use App\Models\ResortOwner;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-
 
 class LoginController extends Controller
 {
     public function login(Request $request)
-    {
-        $request->session()->flash('form_type', 'login');
-    
-        // Validate input
-        $request->validate([
-            'username' => 'required|string',
-            'password' => ['required', 'regex:/[!@#$%^&*(),.?":{}|<>]/'],
+        {
+            $request->session()->flash('form_type', 'login');
+        
+            $request->validate([
+                'username' => 'required|string',
+                'password' => 'required|string',  
+            ]);
+        
+            $adminUsername = 'Admin';
+            $adminPassword = 'Admin246_>@';
 
-        ]);
-    
-        // Admin credentials (hardcoded)
-        $adminUsername = 'Admin';
-        $adminPassword = 'Admin246_>@';
-    
-        if (
-            $request->username === $adminUsername &&
-            $request->password === $adminPassword
-        ) {
-            return redirect()->route('admin.dashboard');
+            Log::info('Admin check started with:', [
+                'submitted_username' => $request->username,
+                'submitted_password' => $request->password,
+            ]);
+
+            if (strtolower($request->username) === strtolower($adminUsername) && $request->password === $adminPassword) {
+                Log::info('Admin login successful.');
+                return redirect()->route('admin.dashboard');
         }
-    
-        // Resort owner login via database
-        $owner = ResortOwner::where('username', $request->username)->first();
+
+            $owner = ResortOwner::where('username', $request->username)->first();
     
         if (!$owner) {
-            // Username not found
+            Log::info('Username not found: ' . $request->username);
             return redirect()->back()->withErrors([
                 'username' => 'Username not found.',
             ])->withInput()->with('form', 'login');
         }
     
         if (!Hash::check($request->password, $owner->password)) {
-            // Password incorrect
+            Log::info('Incorrect password for username: ' . $request->username);
             return redirect()->back()->withErrors([
                 'password' => 'Incorrect password.',
             ])->withInput()->with('form', 'login');
         }
     
         Auth::login($owner);
-    
-        // Now you can log the user details
-        Log::info('User in:', ['user' => Auth::user()]);
-    
+        Log::info('User logged in:', ['user' => Auth::user()]);
         return redirect()->route('resort.owner');
     }
     

@@ -212,41 +212,47 @@
             </form>
         </div>
 
-        <!-- Login Form -->
-        <div id="loginForm" class="form-wrapper active">
-          <h4 class="mb-4 text-center">Login</h4>
-          @if(session('error'))
-            <div class="alert alert-danger text-center">
-              {{ session('error') }}
-            </div>
-          @endif
-          <form method="POST" action="{{ route('login') }}">
-            @csrf
+      <!-- Login Form -->
+      <div id="loginForm" class="form-wrapper active">
+        <h4 class="mb-4 text-center">Login</h4>
+        
+        @if(session('error'))
+          <div class="alert alert-danger text-center">
+            {{ session('error') }}
+          </div>
+        @endif
+        
+        <form method="POST" action="{{ route('login') }}">
+          @csrf
 
-            <div class="mb-3">
-              <label class="form-label">Username</label>
-              <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ session('username') ? session('username') : old('username') }}">
-              @error('username') <div class="text-danger small">{{ $message }}</div> @enderror
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ old('username') }}">
+            @error('username') 
+              <div class="text-danger small">{{ $message }}</div> 
+            @enderror
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <div class="position-relative">
-                <input type="password" name="password" class="form-control pe-5" id="loginPassword" value="{{ session('password') ? session('password') : old('password') }}">
-                <span class="eye-icon" onclick="togglePasswordVisibility('loginPassword')">
-                  <i class="bi bi-eye" id="loginPassword-eye"></i>
-                </span>
-              </div>
-              @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="position-relative">
+              <input type="password" name="password" class="form-control pe-5" id="loginPassword" value="{{ old('password') }}">
+              <span class="eye-icon" onclick="togglePasswordVisibility('loginPassword')">
+                <i class="bi bi-eye" id="loginPassword-eye"></i>
+              </span>
             </div>
+            @error('password') 
+              <div class="text-danger small">{{ $message }}</div> 
+            @enderror
+          </div>
 
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
 
-            <div class="text-center">
-              <button type="button" class="toggle-btn" onclick="toggleForms()">Don’t have an account? Register</button>
-            </div>
-          </form>
-        </div>
+          <div class="text-center">
+            <button type="button" class="toggle-btn" onclick="toggleForms()">Don’t have an account? Register</button>
+          </div>
+        </form>
+      </div>
       </div>
     </div>
   </div>
@@ -271,165 +277,161 @@
     </div>
   </div>
 
-      <script>
-      // Optional email validation (for Gmail only)
-      const emailInput = document.querySelector('input[name="email"]');
-      emailInput.addEventListener('blur', function () {
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if (!emailPattern.test(emailInput.value)) {
-          emailInput.setCustomValidity("Please enter a valid Gmail address.");
-          emailInput.reportValidity();
-        } else {
-          emailInput.setCustomValidity("");
+  <script>
+        if (window.history.replaceState) {
+          window.history.replaceState(null, null, window.location.href);
         }
-      });
-
-      document.addEventListener('DOMContentLoaded', function () {
-        const termsCheckbox = document.getElementById('termsCheckbox');
-        const registerBtn = document.getElementById('registerBtn');
-        
-        termsCheckbox.addEventListener('change', function () {
-          registerBtn.disabled = !termsCheckbox.checked;
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || window.performance && window.performance.navigation.type === 2) {
+                window.location.reload();
+            }
         });
-
-        // Handle Agree/Disagree actions
-        const agreeBtn = document.getElementById('agreeBtn');
-        const disagreeBtn = document.getElementById('disagreeBtn');
-
-        agreeBtn.addEventListener('click', function () {
-          termsCheckbox.checked = true;
-          registerBtn.disabled = false;
-        });
-
-        disagreeBtn.addEventListener('click', function () {
-          termsCheckbox.checked = false;
-          registerBtn.disabled = true;
-        });
-
-        // Real-time password validation
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const passwordError = document.getElementById('passwordError');
-        const confirmPasswordError = document.getElementById('confirmPasswordError');
-
-        // Password strength validation (on blur)
-        passwordInput.addEventListener('blur', function () {
-          const password = passwordInput.value.trim();
-          const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
-          if (password === '') {
-            passwordError.textContent = 'Password is required.';
-          } else if (!passwordStrengthPattern.test(password)) {
-            passwordError.textContent = 'Password must be at least 8 characters, with an uppercase letter, a number, and a special character.';
+        // Optional email validation (for Gmail only)
+        const emailInput = document.querySelector('input[name="email"]');
+        emailInput.addEventListener('blur', function () {
+          const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+          if (!emailPattern.test(emailInput.value)) {
+            emailInput.setCustomValidity("Please enter a valid Gmail address.");
+            emailInput.reportValidity();
           } else {
-            passwordError.textContent = '';
+            emailInput.setCustomValidity("");
           }
         });
 
-        // Confirm password validation (on blur)
-        confirmPasswordInput.addEventListener('blur', function () {
-          if (confirmPasswordInput.value.trim() === '') {
-            confirmPasswordError.textContent = 'Please confirm your password.';
-          } else if (passwordInput.value !== confirmPasswordInput.value) {
-            confirmPasswordError.textContent = 'Passwords do not match.';
-          } else {
-            confirmPasswordError.textContent = '';
-          }
+        document.addEventListener('DOMContentLoaded', function () {
+          const termsCheckbox = document.getElementById('termsCheckbox');
+          const registerBtn = document.getElementById('registerBtn');
+          
+          termsCheckbox.addEventListener('change', function () {
+            registerBtn.disabled = !termsCheckbox.checked;
+          });
+
+          // Handle Agree/Disagree actions
+          const agreeBtn = document.getElementById('agreeBtn');
+          const disagreeBtn = document.getElementById('disagreeBtn');
+
+          agreeBtn.addEventListener('click', function () {
+            termsCheckbox.checked = true;
+            registerBtn.disabled = false;
+          });
+
+          disagreeBtn.addEventListener('click', function () {
+            termsCheckbox.checked = false;
+            registerBtn.disabled = true;
+          });
+
+          // Real-time password validation
+          const passwordInput = document.getElementById('password');
+          const confirmPasswordInput = document.getElementById('confirmPassword');
+          const passwordError = document.getElementById('passwordError');
+          const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+          // Password strength validation (on blur)
+          passwordInput.addEventListener('blur', function () {
+            const password = passwordInput.value.trim();
+            const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+            if (password === '') {
+              passwordError.textContent = 'Password is required.';
+            } else if (!passwordStrengthPattern.test(password)) {
+              passwordError.textContent = 'Password must be at least 8 characters, with an uppercase letter, a number, and a special character.';
+            } else {
+              passwordError.textContent = '';
+            }
+          });
+
+          // Confirm password validation (on blur)
+          confirmPasswordInput.addEventListener('blur', function () {
+            if (confirmPasswordInput.value.trim() === '') {
+              confirmPasswordError.textContent = 'Please confirm your password.';
+            } else if (passwordInput.value !== confirmPasswordInput.value) {
+              confirmPasswordError.textContent = 'Passwords do not match.';
+            } else {
+              confirmPasswordError.textContent = '';
+            }
+          });
         });
-      });
 
-      // Toggle password visibility
-      function togglePasswordVisibility(id) {
-        const input = document.getElementById(id);
-        const icon = document.getElementById(`${id}-eye`);
+        // Toggle password visibility
+        function togglePasswordVisibility(id) {
+          const input = document.getElementById(id);
+          const icon = document.getElementById(`${id}-eye`);
 
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.remove("bi-eye");
-          icon.classList.add("bi-eye-slash");
-        } else {
-          input.type = "password";
-          icon.classList.remove("bi-eye-slash");
-          icon.classList.add("bi-eye");
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+          } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+          }
         }
-      }
 
-      // Toggle between register and login forms
-      function toggleForms() {
-        const registerForm = document.getElementById('registerForm');
-        const loginForm = document.getElementById('loginForm');
-
-        // Check which form is currently active
-        const isRegisterFormActive = registerForm.classList.contains('active');
-        
+        // Toggle between register and login forms
         function toggleForms() {
           const registerForm = document.getElementById('registerForm');
           const loginForm = document.getElementById('loginForm');
 
-          // Check if the register form is currently active
+          // Check which form is currently active
           const isRegisterFormActive = registerForm.classList.contains('active');
+          
+          function toggleForms() {
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('loginForm');
 
-          // If you're currently on the login form and switching to register
-          if (!isRegisterFormActive) {
-            // Switch forms without validating password
-            registerForm.classList.toggle('active');
-            loginForm.classList.toggle('active');
-          } else {
-            
+            // Check if the register form is currently active
+            const isRegisterFormActive = registerForm.classList.contains('active');
+
+            // If you're currently on the login form and switching to register
+            if (!isRegisterFormActive) {
+              // Switch forms without validating password
+              registerForm.classList.toggle('active');
+              loginForm.classList.toggle('active');
+            } else {
+              
+            }
           }
+
+          function validateLogin() {
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value.trim();
+          
+          // Password strength pattern (password must be at least 8 characters, with lowercase, uppercase, number, and special character)
+          const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+          // Check if the username and password are valid
+          if (username === '' || password === '') {
+            alert('Please enter both username and password.');
+            console.log("Username:", username);
+            console.log("Password:", password);
+            return false;  // Prevent form submission
+          }
+
+          // Check if the username and password are the admin credentials
+          if (username === 'Admin' && password === 'Admin246') {
+            alert('Admin logged in successfully!');
+            console.log("Username:", username);
+            console.log("Password:", password);
+            window.location.href = '/welcome';  // Redirect to the admin dashboard
+            return false;  // Prevent form submission and redirect instead
+          }
+
+          // Check password strength for non-admin users
+          if (!passwordStrengthPattern.test(password)) {
+            alert('Please enter a valid password. Ensure it meets the required strength.');
+            console.log("Username:", username);
+            console.log("Password:", password);
+            return false;  // Prevent form submission
+          }
+
+          // If everything is valid, submit the login form or handle additional logic here
+          return true;  // Allow form submission or further processing
         }
-
-        function validateLogin() {
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
-        
-        // Password strength pattern (password must be at least 8 characters, with lowercase, uppercase, number, and special character)
-        const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-        // Check if the username and password are valid
-        if (username === '' || password === '') {
-          alert('Please enter both username and password.');
-          console.log("Username:", username);
-          console.log("Password:", password);
-          return false;  // Prevent form submission
+          // Toggle between register and login forms
+          registerForm.classList.toggle('active');
+          loginForm.classList.toggle('active');
         }
-
-        // Check if the username and password are the admin credentials
-        if (username === 'Admin' && password === 'Admin246') {
-          alert('Admin logged in successfully!');
-          console.log("Username:", username);
-          console.log("Password:", password);
-          window.location.href = '/welcome';  // Redirect to the admin dashboard
-          return false;  // Prevent form submission and redirect instead
-        }
-
-        // Check password strength for non-admin users
-        if (!passwordStrengthPattern.test(password)) {
-          alert('Please enter a valid password. Ensure it meets the required strength.');
-          console.log("Username:", username);
-          console.log("Password:", password);
-          return false;  // Prevent form submission
-        }
-
-        // If everything is valid, submit the login form or handle additional logic here
-        return true;  // Allow form submission or further processing
-      }
-        // Toggle between register and login forms
-        registerForm.classList.toggle('active');
-        loginForm.classList.toggle('active');
-      }
-    </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    if (window.history.replaceState) {
-        window.history.replaceState(null, null, window.location.href);
-    }
-
-    // Prevent back button caching
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted || window.performance && window.performance.navigation.type === 2) {
-            window.location.reload();
-        }
-    });
-</script>
+  </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Parallax Hero Section */
         .hero {
             background-image: url('{{ asset('images/sogod bay scuba resort.jpg') }}');
             background-size: cover;
@@ -93,7 +92,7 @@
 
         .card-body .text-start {
             flex: 1;
-            margin-bottom: 1.25rem; /* Adds space between the text and button */
+            margin-bottom: 1.25rem; 
         }
 
         .card-body button {
@@ -102,14 +101,14 @@
             position: absolute;
             bottom: 15px;
             right: 15px;
-            background-color: #003366; /* Dark Blue */
+            background-color: #003366; 
             color: white;
             border: 1px solid #003366;
             border-radius: 6px;
         }
 
         .card-body button:hover {
-            background-color: #002244; /* Darker Blue */
+            background-color: #002244; 
             border-color: #002244;
             color: #ffffff;
         }
@@ -140,8 +139,8 @@
 
         .rating {
             font-size: 1.9rem;
-            color: #FFA500; /* Yellow-orange */
-            letter-spacing: 2px; /* Adds spacing between stars */
+            color: #FFA500; 
+            letter-spacing: 2px; 
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
@@ -169,7 +168,28 @@
         }
 
         .text-dark-blue {
-            color: #001f3f; /* Dark blue color */
+            color: #001f3f; 
+        }
+
+        .home-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            z-index: 4;
+            transition: transform 0.3s ease;
+            position: sticky; 
+            right: 20px; 
+            bottom: 5000px; 
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .home-btn .bi {
+            line-height: 1;
         }
     </style>
 </head>
@@ -293,6 +313,11 @@
             @endforeach
         </div>
     </div>
+    <!-- Home Button -->
+    <a href="{{ url('/welcome') }}" class="home-btn d-flex justify-content-center align-items-center position-absolute bottom-0 end-0 m-3 rounded-circle bg-white shadow-lg p-3">
+        <i class="bi bi-house-door fs-4 text-dark"></i>
+    </a>
+
 </section>
 <!-- FOOTER -->
     <footer class="footer-darkblue text-white text-center py-3">
@@ -302,5 +327,13 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('scroll', function() {
+            const homeButton = document.querySelector('.home-btn');
+            const scrollPosition = window.scrollY; 
+            const parallaxEffect = scrollPosition * 0.5; 
+            homeButton.style.transform = `translateY(${parallaxEffect}px)`;
+        });
+    </script>
 </body>
 </html>

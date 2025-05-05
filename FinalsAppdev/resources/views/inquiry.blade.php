@@ -93,6 +93,9 @@
         .text-dark-blue {
             color: #001f3f;
         }
+        .spinner-border {
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -121,7 +124,7 @@
     <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-overlay"></div>
-        <div class="container h-100 d-flex justify-content-center align-items-center hero-content text-center">
+            <div class="container h-100 d-flex justify-content-center align-items-center hero-content text-center">
             <div>
                 <h1 class="display-3 fw-bold text-white">INQUIRY</h1>
                 <p class="lead text-white">We're here to help! Select your inquiry type and send us your message.</p>
@@ -129,52 +132,107 @@
         </div>
     </section>
 
-   <!-- INQUIRY FORM SECTION -->
-        <section class="py-5 bg-light">
-            <div class="container">
-                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                    <div class="row g-0 align-items-stretch">
-                        <!-- LEFT: Icon or Image -->
-                        <div class="col-md-6 d-none d-md-block">
-                            <img src="{{ asset('/images/msgs.jpg') }}" alt="Inquiry Icon" 
-                                class="img-fluid h-100 w-100 object-fit-cover" 
-                                style="object-fit: cover;">
-                        </div>
+    <!-- INQUIRY FORM SECTION -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="row g-0 align-items-stretch">
+                    <div class="col-md-6 d-none d-md-block">
+                        <img src="{{ asset('/images/msgs.jpg') }}" alt="Inquiry Icon" class="img-fluid h-100 w-100 object-fit-cover">
+                    </div>
+                    <div class="col-md-6 p-4 d-flex align-items-center">
+                        <form class="w-100" method="POST" action="{{ route('inquiry.submit') }}" onsubmit="return validateForm()">
+                            @csrf
+                            <div class="alert-container">
+                                @if(session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+                                @if(session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('error') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+                                @if ($errors->any())
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <ul class="mb-0">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+                            </div>
 
-                        <!-- RIGHT: Form -->
-                        <div class="col-md-6 p-4 d-flex align-items-center">
-                            <form class="w-100">
-                                <div class="mb-3">
-                                    <label for="inquiryType" class="form-label">Inquiry Type</label>
-                                    <select class="form-select" id="inquiryType" required>
-                                        <option selected disabled value="">Choose an option</option>
-                                        <option value="booking">Booking</option>
-                                        <option value="pricing">Pricing</option>
-                                        <option value="services">Resort Services</option>
-                                        <option value="others">Others</option>
-                                    </select>
+                               <!-- Inquiry Type -->
+                            <div class="mb-3">
+                                <label for="inquiryType" class="form-label">Inquiry Type</label>
+                                <select class="form-select" id="inquiryType" name="inquiryType" required 
+                                        onchange="toggleOtherInquiry(this)" 
+                                        data-bs-toggle="tooltip" title="Select the category that best describes your concern.">
+                                    <option selected disabled value="">Choose an option</option>
+                                    <option value="booking">Booking</option>
+                                    <option value="pricing">Pricing</option>
+                                    <option value="services">Resort Services</option>
+                                    <option value="availability">Availability</option>
+                                    <option value="amenities">Amenities</option>
+                                    <option value="events">Event Hosting</option>
+                                    <option value="others">Others</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3 d-none" id="otherInquiryDiv">
+                                <label for="otherInquiry" class="form-label">Please specify</label>
+                                <input type="text" class="form-control" id="otherInquiry" name="otherInquiry" maxlength="100">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required maxlength="100">
+                            </div>
+
+                            <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                                <input 
+                                type="email" 
+                                class="form-control" 
+                                id="email" 
+                                name="email" 
+                                required 
+                                maxlength="255" 
+                                pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" 
+                                title="Only Gmail addresses are allowed (e.g., user@gmail.com)"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                data-bs-title="Please enter a Gmail address (e.g., yourname@gmail.com)"
+                                >
+                                <div class="invalid-feedback">
+                                Please enter a valid Gmail address (e.g., user@gmail.com).
                                 </div>
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Full Name</label>
-                                    <input type="text" class="form-control" id="name" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required maxlength="1000" oninput="checkMaxLength(this)"></textarea>
+                                <div id="messageError" class="invalid-feedback" style="display: none;">
+                                    The message cannot exceed 1000 characters.
                                 </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email address</label>
-                                    <input type="email" class="form-control" id="email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="message" class="form-label">Message</label>
-                                    <textarea class="form-control" id="message" rows="4" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">Submit Inquiry</button>
-                            </form>
-                        </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" id="submitBtn">
+                                <span id="btnText">Submit Inquiry</span>
+                                <div class="spinner-border spinner-border-sm ms-2 d-none" role="status" id="loadingSpinner"></div>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </section>
-
-
+        </div>
+    </section>
 
     <!-- EXPLORE SECTION -->
     <section class="py-5">
@@ -216,7 +274,6 @@
         </div>
     </section>
 
-
     <!-- FOOTER -->
     <footer class="footer-darkblue text-white text-center py-3">
         <div class="container">
@@ -225,5 +282,123 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function validateForm() {
+            const emailInput = document.getElementById("email");
+            const messageInput = document.getElementById("message");
+            const submitBtn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const spinner = document.getElementById("loadingSpinner");
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+            // Check if email is valid
+            if (!emailPattern.test(emailInput.value)) {
+                emailInput.classList.add("is-invalid");
+                return false;
+            } else {
+                emailInput.classList.remove("is-invalid");
+            }
+
+            // Check if message exceeds character limit
+            if (messageInput.value.length > 1000) {
+                messageInput.classList.add("is-invalid");
+                document.getElementById("messageError").style.display = "block";  // Show error
+                return false;  // Prevent form submission
+            } else {
+                messageInput.classList.remove("is-invalid");
+                document.getElementById("messageError").style.display = "none";  // Hide error
+            }
+
+            btnText.textContent = "Submitting...";
+            spinner.classList.remove("d-none");
+            submitBtn.disabled = true;
+
+            return true; 
+        }
+
+        // Toggle 'Others' Inquiry input visibility
+        function toggleOtherInquiry(select) {
+            const otherDiv = document.getElementById('otherInquiryDiv');
+            const otherInput = document.getElementById('otherInquiry');
+            
+            if (select.value === "others") {
+                otherDiv.classList.remove("d-none");
+                otherInput.required = true;
+            } else {
+                otherDiv.classList.add("d-none");
+                otherInput.required = false;
+                otherInput.value = "";
+            }
+        }
+
+        // Validate Email input with feedback
+        function validateEmail() {
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('emailError');
+
+            if (!emailInput.checkValidity()) {
+                emailInput.classList.add('is-invalid');
+                emailError.style.display = 'block'; 
+            } else {
+                emailInput.classList.remove('is-invalid');
+                emailError.style.display = 'none'; 
+            }
+        }
+
+        function checkMaxLength(textarea) {
+            const messageError = document.getElementById('messageError');
+
+            if (textarea.value.length > 1000) {
+                textarea.classList.add("is-invalid");
+                messageError.style.display = "block";  // Show error
+            } else {
+                textarea.classList.remove("is-invalid");
+                messageError.style.display = "none";  // Hide error
+            }
+        }
+
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const emailInput = document.getElementById('email');
+            if (!emailInput.checkValidity()) {
+                e.preventDefault(); // Prevent form submission if the email is invalid
+                validateEmail(); // Ensure the error is displayed
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        (() => {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+
+        document.getElementById('email').addEventListener('input', function () {
+            const emailInput = this;
+            const pattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+            if (emailInput.value === '' || !pattern.test(emailInput.value)) {
+                emailInput.classList.add('is-invalid');
+                emailInput.classList.remove('is-valid');
+            } else {
+                emailInput.classList.add('is-valid');
+                emailInput.classList.remove('is-invalid');
+            }
+        });          
+    </script>
 </body>
 </html>

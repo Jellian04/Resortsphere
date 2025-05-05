@@ -156,13 +156,10 @@
                 <a class="nav-link " href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
             </li>   
             <li class="nav-item">
-                <a class="nav-link" href="{{ url('/adminowner') }}"><i class="bi bi-person-badge me-2"></i>Owners</a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link active" href="{{ url('/adminuser') }}"><i class="bi bi-people me-2"></i>Users</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url('/welcome') }}" target="_blank"><i class="bi bi-globe me-2"></i>View Website</a>
+                <a class="nav-link" href="{{ url('/welcome') }}"><i class="bi bi-globe me-2"></i>View Website</a>
             </li>
         </ul>
         <a class="nav-link logout-link" href="{{ url('/login') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>

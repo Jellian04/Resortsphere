@@ -148,7 +148,7 @@
             <div class="content-section">
                 <!-- Logo beside the content -->
                 <div class="about-logo">
-                    <img src="{{ asset('images/logo.png') }}" alt="Resortsphere Logo">
+                    <img src="{{ asset('images/Logo.png') }}" alt="Resortsphere Logo">
                 </div>
 
                 <div class="text-section">

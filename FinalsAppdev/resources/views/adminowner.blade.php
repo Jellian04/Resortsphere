@@ -185,7 +185,50 @@
                     </div>
                 </div>
             </div>
+
             <div class="mt-5">
+                <!-- Pending Resort Owners Table -->
+                <h4 class="mb-3">Pending Resort Owners</h4>
+                <div class="table-responsive">
+                    <table id="pendingOwnersTable" class="table table-bordered table-striped table-hover bg-white">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Zipcode</th>
+                                <th>Resort Name</th>
+                                <th>Type</th>
+                                <th>Image</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach ($pendingOwners as $owner)
+                            <tr>
+                                <td>{{ $owner->id }}</td>
+                                <td>{{ $owner->firstname }} {{ $owner->lastname }}</td>
+                                <td>{{ $owner->email }}</td>
+                                <td>{{ $owner->username }}</td>
+                                <td>{{ $owner->zipcode }}</td>
+                                <td>{{ $owner->resortname }}</td>
+                                <td>{{ $owner->type_of_accommodation }}</td>
+                                <td>
+                                    @if($owner->resort_img)
+                                        <img src="{{ asset('images/' . $owner->resort_img) }}" alt="Owner Image" class="img-thumbnail">
+                                    @endif
+                                </td>
+                                <td>{{ $owner->status }}</td>
+                            </tr>
+                        @endforeach
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-5">
+                <!-- Resort Owners Table -->
                 <h4 class="mb-3">Resort Owners</h4>
                 <div class="table-responsive">
                     <table id="ownersTable" class="table table-bordered table-striped table-hover bg-white">
@@ -202,7 +245,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($owners as $owner)
+                            @foreach ($approvedOwners as $owner)
                                 <tr>
                                     <td>{{ $owner->id }}</td>
                                     <td>{{ $owner->firstname }} {{ $owner->lastname }}</td>
@@ -210,7 +253,7 @@
                                     <td>{{ $owner->username }}</td>
                                     <td>{{ $owner->resortname }}</td>
                                     <td>{{ $owner->created_at->format('F d, Y') }}</td>
-                                    <td>{{ ucfirst($owner->status) }}</td>
+                                    <td>{{ ucwords($owner->status) }}</td>
                                     <td>
                                         <form action="{{ route('admin.updateStatus', $owner->id) }}" method="POST" class="d-flex">
                                             @csrf

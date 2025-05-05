@@ -36,11 +36,16 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+    'resort_owner' => [
+        'driver' => 'session',
+        'provider' => 'resort_owners',  // Make sure this is set to your custom provider if needed
+    ],
+],
+
 
     /*
     |--------------------------------------------------------------------------
