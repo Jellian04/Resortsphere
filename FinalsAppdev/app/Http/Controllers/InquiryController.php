@@ -14,32 +14,49 @@ class InquiryController extends Controller
 
     public function sendEmail(Request $request)
     {
+
+        \Log::info('Inquiry submission started', $request->all());
+    
+        // Add this debug line
+        \Log::info('Mail Configuration:', [
+            'driver' => config('mail.default'),
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+        ]);
+
         // Validate incoming request
         $request->validate([
             'inquiryType' => 'required|string|in:booking,pricing,services,availability,amenities,events,others',  
-            'otherInquiry' => 'nullable|string|max:100', // validate only if "others" is selected
+            'otherInquiry' => 'nullable|string|max:100',
             'name' => 'required|string|max:100',  
-            'email' => ['required', 'email', 'max:255', 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'],
-            'message' => 'required|string|max:1000',  
+            'email' => ['required', 'email', 'max:255', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\- ]+$/'],
+            'message' => 'required|string|max:1000',
+            'contactMethod' => 'required|in:email,phone'
         ]);
 
         // Compose the email content
-        $emailMessage = "Inquiry Type: {$request->inquiryType}\n";
-        $emailMessage = "Specified Inquiry Type: {$request->otherInquiry}\n";
+        $emailMessage = "New Inquiry Received\n\n";
+        $emailMessage .= "Inquiry Type: {$request->inquiryType}\n";
+        if ($request->inquiryType === 'others' && $request->otherInquiry) {
+            $emailMessage .= "Specified Inquiry: {$request->otherInquiry}\n";
+        }
         $emailMessage .= "Name: {$request->name}\n";
-        $emailMessage .= "Email: {$request->email}\n";
-        $emailMessage .= "Message:\n{$request->message}";
+        $emailMessage .= "Contact Method: {$request->contactMethod}\n";
+        $emailMessage .= $request->contactMethod === 'email' 
+            ? "Email: {$request->email}\n"
+            : "Phone: {$request->phone}\n";
+        $emailMessage .= "\nMessage:\n{$request->message}\n";
 
         try {
             Mail::raw($emailMessage, function ($mail) use ($request) {
-                $mail->to('jellianzilmar422@gmail.com') 
-                     ->subject('New Inquiry');
+                $mail->to('jellianzilmar422@gmail.com')
+                     ->subject("New Inquiry: {$request->inquiryType}");
             });
 
-            // If email is sent successfully, return success message
             return back()->with('success', 'Inquiry sent successfully!');
         } catch (\Exception $e) {
-            // If email sending fails, return error message
+            \Log::error("Email sending failed: " . $e->getMessage());
             return back()->with('error', 'Failed to send inquiry. Please try again.');
         }
     }

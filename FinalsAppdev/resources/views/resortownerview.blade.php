@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -223,206 +225,441 @@
             <p class="mb-0">Registering a resort needs admin approval. You can submit multiple resort registrations. Previous entries will still be processed.</p>
         </div>
         <div class="container my-5">
-        <h3 class="text-center mb-4">My Resorts</h3>
-        <div class="row">
+            <h3 class="text-center mb-4">My Resorts</h3>
+            <div class="row">
             <!-- Approved Resorts Section -->
-        <div class="col-md-6 mb-4">
-            <h4 class="text-dark mb-3">Approved Resorts</h4>
-            @if($approvedResorts->isNotEmpty())
-                <div class="row">
-                    @foreach($approvedResorts as $resort)
-                        <div class="col-md-12 mb-4">
-                            <div class="card shadow-lg rounded-4 border-0 bg-custom-blue">
-                                <div class="card-body">
-                                    <h5 class="card-title text-light">{{ $resort->resortname }}</h5>
-                                    <p class="text-light"><strong>Address:</strong> {{ $resort->resorts_address }}</p>
-                                    <p class="text-light"><strong>Zipcode:</strong> {{ $resort->zipcode }}</p>
-                                    <p class="text-light"><strong>Accommodation:</strong> {{ $resort->type_of_accommodation }}</p>
-                                    <p class="text-light"><strong>Description:</strong>
-                                        <span class="short-desc">{{ Str::limit($resort->description, 100) }}</span>
-                                        <span class="full-desc d-none">{{ $resort->description }}</span>
-                                        <button class="btn btn-sm btn-link text-light toggle-desc p-0">Read more</button>
-                                    </p> 
-                                    <button class="btn btn-light shadow-sm px-4 py-2"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editModal"
-                                            onclick="fillEditForm(this)"
-                                            data-id="{{ $resort->id }}"
-                                            data-name="{{ $resort->resortname }}"
-                                            data-address="{{ $resort->resorts_address }}"
-                                            data-zipcode="{{ $resort->zipcode }}"
-                                            data-description="{{ $resort->description }}"
-                                            data-accomodation="{{ $resort->type_of_accomodation }}">
-                                        Edit
-                                    </button>  
-                                                                   
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-muted">No approved resorts found.</p>
-            @endif
-        </div>
-
-        <!-- Pending Resorts Section -->
-        <div class="col-md-6 mb-4">
-            <h4 class="text-dark mb-3">Pending Resorts</h4>
-            @if($pendingResorts->isNotEmpty())
-                <div class="row">
-                    @foreach($pendingResorts as $resort)
-                        <div class="col-md-12 mb-4">
-                            <div class="card shadow-lg rounded-4 border-0 bg-custom-blue">
-                                <div class="card-body">
-                                    <h5 class="card-title text-light">{{ $resort->resortname }}</h5>
-                                    <p class="text-light"><strong>Address:</strong> {{ $resort->resorts_address }}</p>
-                                    <p class="text-light"><strong>Zipcode:</strong> {{ $resort->zipcode }}</p>
-                                    <p class="text-light"><strong>Accommodation:</strong> {{ $resort->type_of_accommodation }}</p>
-                                    <p class="text-light"><strong>Description:</strong>
-                                        <span class="short-desc">{{ Str::limit($resort->description, 100) }}</span>
-                                        <span class="full-desc d-none">{{ $resort->description }}</span>
-                                        <button class="btn btn-sm btn-link text-light toggle-desc p-0">Read more</button>
-                                    </p>
-                                    <button class="btn btn-light shadow-sm px-4 py-2"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editModal"
-                                            onclick="fillEditForm(this)"
-                                            data-id="{{ $resort->id }}"
-                                            data-name="{{ $resort->resortname }}"
-                                            data-address="{{ $resort->resorts_address }}"
-                                            data-zipcode="{{ $resort->zipcode }}"
-                                            data-description="{{ $resort->description }}"
-                                            data-accomodation="{{ $resort->type_of_accomodation }}">
-                                        Edit
+                @if($resortsByStatus->has('approve'))
+                <div class="col-md-12 mb-4">
+                    <h4 class="text-dark mb-3">Approved Resorts</h4>
+                    <div class="row">
+                        @foreach($resortsByStatus->get('approve') as $resort)
+                            <div class="col-md-12 mb-4">
+                                <div class="card shadow-lg rounded-4 border-0 bg-custom-blue">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-light">{{ $resort->resort_name }}</h5>
+                                        <p class="text-light"><strong>Address:</strong> {{ $resort->resort_address }}</p>
+                                        <p class="text-light"><strong>Accommodation:</strong> {{ $resort->accommodation_type }}</p>
+                                        <p class="text-light"><strong>Status:</strong> Approved</p>
+                                        
+                                        <!-- Display Description -->
+                                        <p class="text-light"><strong>Description:</strong> {{ $resort->description }}</p>
+                                        
+                                        <!-- Display multiple images -->
+                                    <div class="image-gallery">
+                                        @foreach($resort->resortImages as $image)
+                                            <img src="{{ asset('storage/resort_images/' . $image->image) }}" alt="Resort Image" class="img-fluid mb-3">
+                                        @endforeach
+                                    </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-light mt-2 edit-btn"
+                                        data-id="{{ $resort->id }}"
+                                        data-name="{{ $resort->resort_name }}"
+                                        data-address="{{ $resort->resort_address }}"
+                                        data-accommodation="{{ $resort->accommodation_type }}"
+                                        data-description="{{ $resort->description }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal">
+                                        <i class="bi bi-pencil-square me-1"></i> Edit
                                     </button>
-                                    
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-muted">No pending resorts found.</p>
-            @endif
-        </div>
-    </div>
-
-        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <!-- Modal Header -->
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="editModalLabel">Edit Resort Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                @endif
 
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <form id="editForm" method="POST" class="mx-auto px-3" style="max-width: 700px;">
-                            @csrf
-                            @method('PUT')
+                <!-- Pending Resorts Section -->
+                @if($resortsByStatus->has('pending'))
+                    <div class="col-md-12 mb-4">
+                        <h4 class="text-dark mb-3">Pending Resorts</h4>
+                        <div class="row">
+                            @foreach($resortsByStatus->get('pending') as $resort)
+                                <div class="col-md-12 mb-4">
+                                    <div class="card shadow-lg rounded-4 border-0 bg-custom-blue">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-light">{{ $resort->resort_name }}</h5>
+                                            <p class="text-light"><strong>Address:</strong> {{ $resort->resort_address }}</p>
+                                            <p class="text-light"><strong>Accommodation:</strong> {{ $resort->accommodation_type }}</p>
+                                            <p class="text-light"><strong>Status:</strong> Pending</p>
 
-                            <div class="mb-3">
-                                <label for="resortname" class="form-label fw-semibold">Resort Name</label>
-                                <input type="text" class="form-control shadow-sm rounded-3" id="resortname" name="resortname" required>
-                            </div>
+                                            <!-- Display Description -->
+                                            <p class="text-light"><strong>Description:</strong> {{ $resort->description }}</p>
 
-                            <div class="mb-3">
-                                <label for="resorts_address" class="form-label fw-semibold">Address</label>
-                                <input type="text" class="form-control shadow-sm rounded-3" id="resorts_address" name="resorts_address" required>
-                            </div>
+                                            <!-- Display Resort Image -->
+                                            @php
+                                                $resortImage = \App\Models\ResortImage::where('resort_id', $resort->id)->first(); 
+                                            @endphp
+                                            @if($resortImage)
+                                                <img src="{{ asset('storage/images/' . $resortImage->image) }}" alt="Resort Image" class="img-fluid">
+                                            @else
+                                                <p>No image available</p>
+                                            @endif
+                                        </div>
+                                        <button class="btn btn-light mt-2 edit-btn"
+                                            data-id="{{ $resort->id }}"
+                                            data-name="{{ $resort->resort_name }}"
+                                            data-address="{{ $resort->resort_address }}"
+                                            data-accommodation="{{ $resort->accommodation_type }}"
+                                            data-description="{{ $resort->description }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editModal">
+                                            <i class="bi bi-pencil-square me-1"></i> Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
-                            <div class="mb-3">
-                                <label for="zipcode" class="form-label fw-semibold">Zipcode</label>
-                                <input type="text" class="form-control shadow-sm rounded-3" id="zipcode" name="zipcode">
-                            </div>
+                <!-- Rejected Resorts Section -->
+                @if($resortsByStatus->has('reject'))
+                    <div class="col-md-12 mb-4">
+                        <h4 class="text-dark mb-3">Rejected Resorts</h4>
+                        <div class="row">
+                            @foreach($resortsByStatus->get('reject') as $resort)
+                                <div class="col-md-12 mb-4">
+                                    <div class="card shadow-lg rounded-4 border-0 bg-custom-blue">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-light">{{ $resort->resort_name }}</h5>
+                                            <p class="text-light"><strong>Address:</strong> {{ $resort->resort_address }}</p>
+                                            <p class="text-light"><strong>Accommodation:</strong> {{ $resort->accommodation_type }}</p>
+                                            <p class="text-light"><strong>Status:</strong> Rejected</p>
 
-                            <div class="mb-3">
-                                <label for="accomodation" class="form-label fw-semibold">Accommodation Type</label>
-                                <select name="accomodation" id="accomodation" class="form-control form-control-sm shadow-sm rounded-3" required>
-                                    <option value="" disabled selected>Select accommodation type</option>
-                                    <option value="hotel">Hotel</option>
-                                    <option value="cottage">Cottage</option>
-                                    <option value="villa">Villa</option>
-                                    <option value="bungalow">Bungalow</option>
-                                    <option value="resort">Resort</option>
-                                    <option value="hostel">Hostel</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="guesthouse">Guesthouse</option>
-                                    <option value="loft">Loft</option>
-                                    <option value="farmhouse">Farmhouse</option>
-                                    <option value="mansion">Mansion</option>
-                                    <option value="AirBnB">AirBnB</option>
-                                    <option value="penthouse">Penthouse</option>
-                                </select>
-                                <div class="error" id="type_of_accommodation-error"></div>
-                            </div>
+                                            <!-- Display Description -->
+                                            <p class="text-light"><strong>Description:</strong> {{ $resort->description }}</p>
 
-                            <div class="mb-3">
-                                <label for="description" class="form-label fw-semibold">Description</label>
-                                <textarea class="form-control shadow-sm rounded-3" id="description" name="description" rows="3"></textarea>
-                            </div>
-
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm me-2">Save Changes</button>
-                                <button type="button" class="btn btn-outline-secondary px-4 py-2 shadow-sm" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
+                                            <!-- Display Resort Image -->
+                                            @php
+                                                $resortImage = \App\Models\ResortImage::where('resort_id', $resort->id)->first(); 
+                                            @endphp
+                                            @if($resortImage)
+                                                <img src="{{ asset('storage/images/' . $resortImage->image) }}" alt="Resort Image" class="img-fluid">
+                                            @else
+                                                <p>No image available</p>
+                                            @endif
+                                        </div>
+                                        <button class="btn btn-light mt-2 edit-btn"
+                                            data-id="{{ $resort->id }}"
+                                            data-name="{{ $resort->resort_name }}"
+                                            data-address="{{ $resort->resort_address }}"
+                                            data-accommodation="{{ $resort->accommodation_type }}"
+                                            data-description="{{ $resort->description }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editModal">
+                                            <i class="bi bi-pencil-square me-1"></i> Edit
+                                    </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                     </div>
                 </div>
             </div>
+            </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+    </div>
+    <!-- Edit Resort Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editModalLabel">Edit Resort Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="editForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+
+                    <input type="hidden" name="resort_id" id="editResortId">
+
+                    <div class="row">
+                        <!-- Resort Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="resortname" class="form-label">Resort Name</label>
+                            <input type="text" class="form-control" id="resortname" name="name" required>
+                            <div class="error" id="name-error"></div>
+                        </div>
+
+                        <!-- Accommodation Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="type_of_accommodation" class="form-label">Accommodation Type</label>
+                            <select class="form-control" id="type_of_accommodation" name="accommodation_type" required>
+                                <option value="Room">Room</option>
+                                <option value="Cottage">Cottage</option>
+                                <option value="Scuba Diving">Scuba Diving</option>
+                                <option value="Restaurant">Restaurant</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+
+                        <!-- Resort Address -->
+                        <div class="col-md-12 mb-3">
+                            <label for="resortaddress" class="form-label">Resort Address</label>
+                            <input type="text" class="form-control" id="resortaddress" name="address" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+
+                        <!-- Dropzone Upload -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Upload Images</label>
+                            <div class="dropzone" id="editDropzone"></div>
+                            <small class="text-muted">You can drag and drop or click to upload.</small>
+                        </div>
+
+                        <!-- Map Picker -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Map Location</label>
+                            <div id="map" style="height: 300px;"></div>
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editForm" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var editModal = document.getElementById('editModal');
+            const editButtons = document.querySelectorAll('.edit-btn');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    const address = this.dataset.address;
+                    const accommodation = this.dataset.accommodation;
+                    const description = this.dataset.description;
 
-            if (editModal) {
-                editModal.addEventListener('show.bs.modal', function (event) {
-                    var button = event.relatedTarget;
+                    document.getElementById('editResortId').value = id;
+                    document.getElementById('resortname').value = name;
+                    document.getElementById('resortaddress').value = address;
+                    document.getElementById('type_of_accommodation').value = accommodation;
+                    document.getElementById('description').value = description;
+                });
+            });
+        });
 
-                    var resortId = button.getAttribute('data-id');
-                    var resortName = button.getAttribute('data-name') || '';
-                    var resortAddress = button.getAttribute('data-address') || '';
-                    var zipCode = button.getAttribute('data-zipcode') || '';
-                    var description = button.getAttribute('data-description') || '';
-                    var accommodation = button.getAttribute('data-accomodation') || '';
+         Dropzone.autoDiscover = false;
 
-                    var form = document.getElementById('editForm');
-                    form.action = `/resorts/${resortId}`; // Adjust this URL as needed
+        const maxFiles = 6;
 
-                    form.querySelector('#resortname').value = resortName;
-                    form.querySelector('#resorts_address').value = resortAddress;
-                    form.querySelector('#zipcode').value = zipCode;
-                    form.querySelector('#description').value = description;
-                    form.querySelector('#accomodation').value = accommodation;
+        const myDropzone = new Dropzone("#imageDropzone", {
+            url: "#", // no actual upload for now
+            autoProcessQueue: false,
+            uploadMultiple: true,
+            parallelUploads: maxFiles,
+            maxFiles: maxFiles,
+            maxFilesize: 5, // MB
+            acceptedFiles: "image/jpeg,image/jpg,image/png,image/gif,image/webp",
+            addRemoveLinks: true,
+            paramName: "images",
+            dictDefaultMessage: "Drop images here or click to upload",
+            dictRemoveFile: "Remove",
+            previewsContainer: "#imageDropzone",
+            init: function () {
+                this.on("addedfile", function (file) {
+                    if (this.files.length > maxFiles) {
+                        this.removeFile(file);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Limit Reached',
+                            text: `You can only upload up to ${maxFiles} images.`,
+                        });
+                    }
+                });
+
+                this.on("maxfilesexceeded", function(file) {
+                    this.removeFile(file);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Too many files',
+                        text: `You can only upload up to ${maxFiles} images.`,
+                    });
                 });
             }
         });
 
-        document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.toggle-desc').forEach(button => {
-            button.addEventListener('click', function () {
-                const cardBody = this.closest('p');
-                const shortDesc = cardBody.querySelector('.short-desc');
-                const fullDesc = cardBody.querySelector('.full-desc');
+        document.getElementById('submitButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = document.getElementById('resort-registration-form');
+            const formData = new FormData(form);
 
-                const isExpanded = !fullDesc.classList.contains('d-none');
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
 
-                if (isExpanded) {
-                    fullDesc.classList.add('d-none');
-                    shortDesc.classList.remove('d-none');
-                    this.textContent = 'Read more';
-                } else {
-                    fullDesc.classList.remove('d-none');
-                    shortDesc.classList.add('d-none');
-                    this.textContent = 'Show less';
+            if (myDropzone.getAcceptedFiles().length < 3) {
+                $('#images-error').text('Please upload at least 3 images');
+                return false;
+            }
+
+            myDropzone.getAcceptedFiles().forEach((file, index) => {
+                formData.append(`images[${index}]`, file);
+            });
+
+            $('#submitText').hide();
+            $('#loadingSpinner').show();
+            this.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message || 'Resort registration successfully sent for admin approval!',
+                        confirmButtonText: 'Okay'
+                    }).then(() => {
+                        window.location.href = data.redirect || '/resortownerview';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                // Handle validation errors
+                if (error.errors) {
+                    for (const [field, messages] of Object.entries(error.errors)) {
+                        const errorEl = document.getElementById(`${field}-error`);
+                        if (errorEl) errorEl.textContent = messages[0];
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'An error occurred. Please try again.'
+                    });
+                }
+            })
+            .finally(() => {
+                $('#submitText').show();
+                $('#loadingSpinner').hide();
+                document.getElementById('submitButton').disabled = false;
             });
         });
+        
+        var map;
+        var marker;
+        function initMap() {
+                var defaultLat = 10.3117;  
+                var defaultLng = 123.4578; 
+
+                map = L.map('map').setView([defaultLat, defaultLng], 12);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+                map.on('click', function(e) {
+                    var lat = e.latlng.lat;
+                    var lng = e.latlng.lng;
+                    marker.setLatLng([lat, lng]);
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lng;
+
+                    getAddress(lat, lng);
+                });
+        }
+
+            function getAddress(lat, lng) {
+                var apiUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            document.getElementById('resortaddress').value = data.display_name; 
+                        } else {
+                            document.getElementById('resortaddress').value = 'No address found.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('resortaddress').value = 'Unable to retrieve address.';
+                    });
+            }
+
+            window.onload = initMap;
+            document.getElementById('type_of_accommodation').addEventListener('change', function () {
+                var otherField = document.getElementById('other-accommodation-field');
+                var accommodationType = this.value;
+
+                if (accommodationType === 'other') {
+                    otherField.style.display = 'block';  
+                } else {
+                    otherField.style.display = 'none';  
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('type_of_accommodation');
+            const otherField = document.getElementById('other-accommodation-field');
+            const otherInput = document.getElementById('other_accommodation');
+            const form = select.closest('form');
+
+            // Show/hide the "other" input
+            select.addEventListener('change', function () {
+                if (this.value === 'other') {
+                    otherField.style.display = 'block';
+                } else {
+                    otherField.style.display = 'none';
+                    otherInput.value = '';
+                }
+            });
+
+            // Override select value with custom input if "other" is chosen
+            form.addEventListener('submit', function () {
+                if (select.value === 'other' && otherInput.value.trim() !== '') {
+                    const customValue = otherInput.value.trim();
+
+                    // Create a hidden input to replace the select value
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'accommodation_type';
+                    hiddenInput.value = customValue;
+                    form.appendChild(hiddenInput);
+
+                    // Disable the original select so it doesn't override
+                    select.disabled = true;
+                }
+            });
         });
     </script>
 </body>

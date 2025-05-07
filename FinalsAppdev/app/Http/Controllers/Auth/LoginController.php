@@ -21,7 +21,7 @@ class LoginController extends Controller
             ]);
         
             $adminUsername = 'Admin';
-            $adminPassword = 'Admin246_>@';
+            $adminPassword = 'Admin123!@#';
 
             Log::info('Admin check started with:', [
                 'submitted_username' => $request->username,
@@ -51,7 +51,7 @@ class LoginController extends Controller
     
         Auth::login($owner);
         Log::info('User logged in:', ['user' => Auth::user()]);
-        return redirect()->route('resort.owner');
+        return redirect()->route('resortowner.dashboard');
     }
     
     public function username()

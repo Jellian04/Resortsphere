@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ResortSphere</title>
+  <title>Login and Register to Resortsphere</title>
   <link rel="icon" href="{{ asset('images/Logo.png') }}" type="image/x-icon">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -127,7 +127,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="auth-container">
     <div class="auth-card">
@@ -138,16 +137,9 @@
         <div id="registerForm" class="form-wrapper">
             <h4 class="mb-4 text-center">Create an Account</h4>
 
-            @if(session('success'))
-                <div class="alert alert-success text-center">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             <form method="POST" action="{{ route('register') }}">
                 @csrf
 
-                <!-- Username Input -->
                 <div class="mb-3">
                     <label class="form-label">Username</label>
                     <input type="text" name="username" class="form-control" placeholder="Enter username" value="{{ old('username') }}">
@@ -168,14 +160,12 @@
                   </div>
                 </div>
 
-                <!-- Email Input -->
                 <div class="mb-3">
                     <label class="form-label">Email Address</label>
                     <input type="email" name="email" class="form-control" placeholder="example@gmail.com" value="{{ old('email') }}" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required>
                     @error('email') <div class="text-danger small">{{ $message }}</div> @enderror
                 </div>
 
-                <!-- Password Input -->
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <div class="position-relative">
@@ -188,7 +178,6 @@
                     @error('password') <div class="text-danger small">{{ $message }}</div> @enderror
                 </div>
 
-                <!-- Confirm Password Input -->
                 <div class="mb-3">
                     <label class="form-label">Confirm Password</label>
                     <input type="password" name="password_confirmation" class="form-control" placeholder="Re-enter password" id="confirmPassword" required>
@@ -196,16 +185,17 @@
                     <div id="confirmPasswordError" class="text-danger small"></div>
                 </div>
 
-                <!-- Terms Checkbox -->
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="termsCheckbox" data-bs-toggle="modal" data-bs-target="#termsModal">
-                    <label class="form-check-label" for="termsCheckbox">I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>.</label>
+                <div class="form-check mt-3 mb-3">
+                  <input class="form-check-input" type="checkbox" id="termsCheckbox">
+                  <label class="form-check-label" for="termsCheckbox">
+                    I agree to the <a href="#" id="termsLink">Terms and Conditions</a>
+                  </label>
                 </div>
 
-                <!-- Register Button -->
-                <button type="submit" class="btn btn-primary w-100" id="registerBtn">Register</button>
-
-                <!-- Toggle Login Form Button -->
+                <button type="submit" class="btn btn-primary w-100" id="registerBtn">
+                  <span id="registerText">Register</span>
+                  <span id="registerSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
                 <div class="text-center">
                     <button type="button" class="toggle-btn" onclick="toggleForms()">Already have an account? Login</button>
                 </div>
@@ -259,25 +249,27 @@
 
   <!-- Terms and Conditions Modal -->
   <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body">
-          <p>Please read our terms and conditions carefully.</p>
-          <p>... (your terms and conditions here) ...</p>
+          <p class="mb-3">Please read our terms and conditions carefully before registering:</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla in nisl eu enim imperdiet vulputate. Morbi in nunc vitae turpis egestas mattis.</p>
+          <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Etiam tincidunt sem in diam tincidunt, sed lobortis ligula hendrerit.</p>
         </div>
+
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="disagreeBtn" data-bs-dismiss="modal">Disagree</button>
-          <button type="button" class="btn btn-primary" id="agreeBtn" data-bs-dismiss="modal">Agree</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
+    <script>
         if (window.history.replaceState) {
           window.history.replaceState(null, null, window.location.href);
         }
@@ -301,32 +293,47 @@
         document.addEventListener('DOMContentLoaded', function () {
           const termsCheckbox = document.getElementById('termsCheckbox');
           const registerBtn = document.getElementById('registerBtn');
-          
-          termsCheckbox.addEventListener('change', function () {
-            registerBtn.disabled = !termsCheckbox.checked;
-          });
-
-          // Handle Agree/Disagree actions
+          const termsLink = document.getElementById('termsLink');
           const agreeBtn = document.getElementById('agreeBtn');
           const disagreeBtn = document.getElementById('disagreeBtn');
+          const termsModal = new bootstrap.Modal(document.getElementById('termsModal'));
 
+          // Initial state
+          registerBtn.disabled = !termsCheckbox.checked;
+
+          // Enable/disable register button on checkbox toggle
+          termsCheckbox.addEventListener('change', function () {
+              registerBtn.disabled = !this.checked;
+          });
+
+          // Show modal only if checkbox is NOT already checked
+          termsLink.addEventListener('click', function (e) {
+              e.preventDefault(); // Prevent default link behavior
+              if (!termsCheckbox.checked) {
+                  termsModal.show();
+              }
+          });
+
+          // Agree action
           agreeBtn.addEventListener('click', function () {
-            termsCheckbox.checked = true;
-            registerBtn.disabled = false;
+              termsCheckbox.checked = true;
+              registerBtn.disabled = false;
+              termsModal.hide();
           });
 
+          // Disagree action
           disagreeBtn.addEventListener('click', function () {
-            termsCheckbox.checked = false;
-            registerBtn.disabled = true;
+              termsCheckbox.checked = false;
+              registerBtn.disabled = true;
+              termsModal.hide();
           });
+      });
 
-          // Real-time password validation
           const passwordInput = document.getElementById('password');
           const confirmPasswordInput = document.getElementById('confirmPassword');
           const passwordError = document.getElementById('passwordError');
           const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-          // Password strength validation (on blur)
           passwordInput.addEventListener('blur', function () {
             const password = passwordInput.value.trim();
             const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
@@ -339,7 +346,6 @@
             }
           });
 
-          // Confirm password validation (on blur)
           confirmPasswordInput.addEventListener('blur', function () {
             if (confirmPasswordInput.value.trim() === '') {
               confirmPasswordError.textContent = 'Please confirm your password.';
@@ -349,9 +355,7 @@
               confirmPasswordError.textContent = '';
             }
           });
-        });
 
-        // Toggle password visibility
         function togglePasswordVisibility(id) {
           const input = document.getElementById(id);
           const icon = document.getElementById(`${id}-eye`);
@@ -367,24 +371,17 @@
           }
         }
 
-        // Toggle between register and login forms
         function toggleForms() {
           const registerForm = document.getElementById('registerForm');
           const loginForm = document.getElementById('loginForm');
-
-          // Check which form is currently active
           const isRegisterFormActive = registerForm.classList.contains('active');
           
           function toggleForms() {
             const registerForm = document.getElementById('registerForm');
             const loginForm = document.getElementById('loginForm');
-
-            // Check if the register form is currently active
             const isRegisterFormActive = registerForm.classList.contains('active');
 
-            // If you're currently on the login form and switching to register
             if (!isRegisterFormActive) {
-              // Switch forms without validating password
               registerForm.classList.toggle('active');
               loginForm.classList.toggle('active');
             } else {
@@ -395,43 +392,77 @@
           function validateLogin() {
           const username = document.getElementById('username').value.trim();
           const password = document.getElementById('password').value.trim();
-          
-          // Password strength pattern (password must be at least 8 characters, with lowercase, uppercase, number, and special character)
           const passwordStrengthPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-          // Check if the username and password are valid
           if (username === '' || password === '') {
             alert('Please enter both username and password.');
             console.log("Username:", username);
             console.log("Password:", password);
-            return false;  // Prevent form submission
+            return false;  
           }
-
-          // Check if the username and password are the admin credentials
           if (username === 'Admin' && password === 'Admin246') {
             alert('Admin logged in successfully!');
             console.log("Username:", username);
             console.log("Password:", password);
-            window.location.href = '/welcome';  // Redirect to the admin dashboard
-            return false;  // Prevent form submission and redirect instead
+            window.location.href = '/welcome';  
+            return false;  
           }
 
-          // Check password strength for non-admin users
           if (!passwordStrengthPattern.test(password)) {
             alert('Please enter a valid password. Ensure it meets the required strength.');
             console.log("Username:", username);
             console.log("Password:", password);
-            return false;  // Prevent form submission
+            return false;  
           }
-
-          // If everything is valid, submit the login form or handle additional logic here
-          return true;  // Allow form submission or further processing
+          return true;  
         }
-          // Toggle between register and login forms
           registerForm.classList.toggle('active');
           loginForm.classList.toggle('active');
         }
-  </script>
+        @if(session('success'))
+              document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Registered Successfully!',
+                  text: '{{ session("success") }}',
+                  confirmButtonColor: '#0d6efd'
+                });
+              });
+          @endif
+
+          document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.querySelector('#registerForm form');
+            const registerBtn = document.getElementById('registerBtn');
+            const registerText = document.getElementById('registerText');
+            const registerSpinner = document.getElementById('registerSpinner');
+            
+            if (registerForm) {
+              registerForm.addEventListener('submit', function(e) {
+                // Check terms checkbox again (in case user unchecked during submission)
+                const termsCheckbox = document.getElementById('termsCheckbox');
+                if (!termsCheckbox.checked) {
+                  e.preventDefault();
+                  return;
+                }
+                
+                // Set loading state
+                registerBtn.disabled = true;
+                registerText.textContent = 'Registering...';
+                registerSpinner.classList.remove('d-none');
+              });
+            }
+            
+            // Reset button state if form validation fails
+            window.addEventListener('pageshow', function() {
+              if (registerBtn) {
+                registerBtn.disabled = !document.getElementById('termsCheckbox').checked;
+                registerText.textContent = 'Register';
+                registerSpinner.classList.add('d-none');
+              }
+            });
+          });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

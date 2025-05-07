@@ -216,9 +216,9 @@
                     </div>
                 </div>
             </div>
-            <!-- Pending Owners Table inside a card -->
+            <!-- Pending Resort Information Registration-->
             <div class="mt-5">
-                <h4 class="mb-3">Pending Resort Owners</h4>
+                <h4 class="mb-3">Pending Resort Information Registration</h4>
                 <div class="card card-custom">
                     <div class="card-body">
                         <div class="table-responsive">
@@ -252,7 +252,7 @@
                                                     <img src="{{ asset('images/' . $owner->resort_img) }}" alt="Owner Image" class="img-thumbnail">
                                                 @endif
                                             </td>
-                                            <td>{{ $owner->status }}</td>
+                                            <td>{{ ucwords($owner->status) }}</td>
                                             <td>
                                             @if($owner->status == 'pending')
                                                 <form action="{{ route('admin.updateStatus', $owner->id) }}" method="POST">
@@ -281,11 +281,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Divider -->
             <div class="divider"></div>
 
-            <!-- Resort Owners Table inside a card -->
+            <!-- Resort Owners Table-->
             <div class="mt-5">
                 <h4 class="mb-3">Resort Owners</h4>
                 <div class="card card-custom">
